@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { forwardEnquiry } from "@/features/contact/api";
 import { contactSchema, HONEYPOT_FIELD } from "@/features/contact/schema";
 import { listServiceSlugs } from "@/features/services/service";
+import { env } from "@/lib/env";
 
 /**
  * `POST /api/contact` — the enquiry form's own route handler.
@@ -120,6 +121,34 @@ function newReference(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 8);
 }
 
+/**
+ * The page the enquiry was sent from, taken from `Referer`.
+ *
+ * Derived here rather than accepted from the request body: a field the browser
+ * asserts is a field an attacker can set to anything, and this one is stored and
+ * later read by staff. The header is still client-supplied, so it is treated as
+ * a hint and not as evidence — **it is only used when it points at this site**,
+ * and only its pathname is kept. Anything else becomes `null`, because "we do
+ * not know" is a truthful value and a fabricated path is not.
+ *
+ * `Referrer-Policy: strict-origin-when-cross-origin` (next.config.ts) sends the
+ * full URL on a same-origin request, which is exactly this case.
+ */
+function sourcePathFrom(request: Request): string | null {
+  const referer = request.headers.get("referer");
+  if (!referer) return null;
+
+  try {
+    const url = new URL(referer);
+    if (url.origin !== new URL(env.NEXT_PUBLIC_SITE_URL).origin) return null;
+    // The column is capped at 2000; keep well inside it and drop the query,
+    // which can carry anything a visitor was sent a link with.
+    return url.pathname.slice(0, 512);
+  } catch {
+    return null;
+  }
+}
+
 function json(status: number, body: Record<string, unknown>) {
   return NextResponse.json(body, {
     status,
@@ -191,7 +220,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const result = await forwardEnquiry(parsed.data);
+  const result = await forwardEnquiry(parsed.data, sourcePathFrom(request));
 
   if (result.outcome === "delivered") {
     return json(200, { status: "received" });

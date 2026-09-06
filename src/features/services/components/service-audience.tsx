@@ -30,7 +30,7 @@ export function ServiceAudienceSection({
   if (audiences.length === 0) return null;
 
   return (
-    <Section labelledBy="who-heading" index="03">
+    <Section labelledBy="who-heading">
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-4">
           <SectionHeading id="who-heading" eyebrow="Fit" title="Who this is for" />

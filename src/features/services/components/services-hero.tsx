@@ -11,7 +11,7 @@ import { vocabulary } from "@/lib/vocabulary";
  * CLAUDE.md §3.8b: if a section is better with something removed, remove it —
  * and the whitespace it leaves is what makes the statement land.
  *
- * The deep ground and the ledger rule motif are the site's, not this page's:
+ * The deep ground is the site's, not this page's:
  * `site.css` owns them, the landing hero and the closing CTA band both use them,
  * and the CTA band sits at the foot of this page. A plainer treatment here would
  * read as two different sites on one scroll, which is the opposite of restraint.
@@ -27,10 +27,6 @@ export function ServicesHero() {
        * layout that is pixel-identical either way. */
       className="relative isolate overflow-hidden bg-[var(--hero-ground)] text-[color:var(--hero-ink)]"
     >
-      <div
-        aria-hidden
-        className="ledger-rules pointer-events-none absolute inset-0 -z-10"
-      />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_80%_at_85%_50%,var(--hero-ground-2),transparent_70%)]"

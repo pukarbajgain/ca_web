@@ -85,7 +85,7 @@ export default function AboutPage() {
         </div>
       </header>
 
-      <Section labelledBy="story-heading" ground="surface" index="01">
+      <Section labelledBy="story-heading" ground="surface">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:sticky lg:top-28 lg:col-span-5 lg:self-start">
             <p className="flex items-center gap-3 text-label-small text-on-surface-variant uppercase">
@@ -122,7 +122,7 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section labelledBy="registration-heading" ground="muted" index="02">
+      <Section labelledBy="registration-heading" ground="muted">
         <h2
           id="registration-heading"
           className="font-[family-name:var(--font-display)] text-headline-small text-on-surface"

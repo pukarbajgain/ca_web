@@ -1,217 +1,170 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BadgeCheck, BarChart3, Users } from "lucide-react";
 import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
+import { AssetImage } from "@/components/media/asset-image";
 import { buttonVariants } from "@/components/ui/button";
-import { services } from "@/config/content";
-import { brand, isPresent } from "@/lib/brand";
+import { heroContent, type HeroTrustMarker } from "@/config/content";
+import { assets, withAlt } from "@/lib/assets";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
-import { vocabulary } from "@/lib/vocabulary";
 
 /**
- * Hero — **typographic, not photographic** (ARCHITECTURE.md §D.6).
+ * The landing hero.
  *
- * Three reasons this is the right call, all of which survive the arrival of real
- * assets:
+ * ── The composition, and why it changes shape rather than scaling ───────────
+ * The photograph is the firm's own office, and its left third is deliberately
+ * empty worktop — that emptiness is the headline's ground. So from `lg` the
+ * image is the section's *background*, the copy sits on the bright half, and a
+ * scrim carries the white further right so the measure can breathe without the
+ * text ever crossing onto the laptop.
  *
- *  1. It looks finished with placeholders and stays good afterwards. A hero built
- *     around a stock photograph gets designed around that photograph, and the
- *     firm's real photograph will not match it.
- *  2. It cannot be undermined by a mediocre photo — and a practice's first
- *     photoshoot usually produces mediocre photos.
- *  3. It is the fastest LCP available: the largest contentful paint is text in a
- *     font that is already self-hosted and preloaded, with no image request.
+ * Below `lg` that cannot work: the subject sits on the right of the frame, and
+ * cropping to a phone width either loses it or pushes the copy on top of it. So
+ * the layout does not scale — it **recomposes**. The copy takes a clean white
+ * ground of its own, and the photograph follows underneath as a full-bleed
+ * band, still doing its job (this is a real practice, in a real office) without
+ * fighting the words for the same pixels. Mobile-first means designing that
+ * second composition, not shrinking the first (CLAUDE.md §3.3).
  *
- * ── What fills the right-hand half, and why it is not decoration ─────────────
- * A typographic hero on a wide screen has a real problem: a headline column
- * leaves half the viewport empty, and "empty" reads as unfinished rather than as
- * confident. The usual fixes are a stock photograph (rejected above) or an
- * abstract shape (pretty, says nothing).
- *
- * Instead the right column carries a **ruled index of the practice** — the
- * disciplines, numbered, on hairlines. It fills the space, it is drawn from the
- * firm's own material (a ledger is what an accountant rules), and it does real
- * work: a visitor who reads nothing but the hero still learns what the firm
- * does. It is the same content as the services grid, at a glance.
- *
- * One accent word carries the section's entire colour budget. The credential
- * line beneath the CTAs states what the firm *is*, and every element of it is
- * conditional — with nothing confirmed, the line disappears rather than
- * inventing a number (CLAUDE.md §3.5).
+ * The ink tokens live in `site.css` §1b so the scrim and the type are tuned
+ * together in one place rather than at six call sites.
  */
 export function Hero() {
   return (
-    <section
-      aria-labelledby="hero-heading"
-      /* `-mt-16 pt-16` (and the `lg` pair) pulls the hero up under the sticky
-       * header and pads the content back down. That is what lets the header
-       * render transparent over the deep ground at the top of the page instead
-       * of sitting on it as a light bar — see `site-header.tsx`. The two heights
-       * must match the header's `h-16 lg:h-20`. */
-      className="relative isolate -mt-16 overflow-hidden bg-[var(--hero-ground)] pt-16 text-[color:var(--hero-ink)] lg:-mt-20 lg:pt-20"
-    >
-      {/* Decorative layers: `aria-hidden` so they are never announced, and
-          `pointer-events-none` so they can never swallow a tap on a CTA. */}
-      <div
-        aria-hidden
-        className="ledger-rules pointer-events-none absolute inset-0 -z-10"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_75%_55%_at_12%_0%,var(--hero-ground-2),transparent_72%)]"
-      />
-      {/* A single warm bloom behind the accent word, at very low strength. It is
-          the only place the tertiary hue appears in the hero besides the word
-          itself, which is what stops that word looking arbitrary. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute top-1/3 -left-24 -z-10 size-[36rem] rounded-full bg-[radial-gradient(circle,rgba(255,199,142,0.10),transparent_65%)] blur-3xl"
-      />
+    <section aria-labelledby="hero-heading" className="relative isolate bg-surface">
+      {/* From `lg` the photograph is the ground. Below it, it is the band at the
+          foot of the section instead — one asset, two compositions. */}
+      <div aria-hidden className="absolute inset-0 -z-10 hidden lg:block">
+        <AssetImage
+          asset={withAlt(assets.heroLandscape, "")}
+          sizes="100vw"
+          priority
+          rounded={false}
+          className="h-full"
+          imageClassName="object-cover"
+        />
+        {/* The scrim. Fully opaque across the measure, then released across a
+            long fade so the join is never visible as an edge. The stops are
+            deliberately generous: the headline's last line is its longest, and
+            at 1440 it reaches the laptop — which is bright, but bright is not
+            the same as uniform, and type must not sit on a gradient it was not
+            measured against. */}
+        <div className="absolute inset-0 bg-gradient-to-r from-surface from-45% via-surface/70 via-64% to-transparent to-84%" />
+      </div>
 
-      <Container className="py-16 sm:py-20 lg:py-24">
-        <div className="grid items-center gap-12 lg:min-h-[30rem] lg:grid-cols-12 lg:gap-16">
-          <div className="relative lg:col-span-7">
-            {/* The spine ties the copy to the ledger grid. Only from `lg`, where
-                there is a real gutter for it to sit in. */}
-            <span
-              aria-hidden
-              className="ledger-spine absolute top-0 -left-8 hidden h-full w-px lg:block"
-            />
+      <Container className="relative py-14 sm:py-20 lg:py-28 xl:py-32">
+        <div className="max-w-2xl lg:max-w-[34rem] xl:max-w-[38rem]">
+          {/* `text-balance` rather than a hand-placed break: the headline is
+              three lines at `lg` and two at `xl`, and a <br> would be wrong at
+              one of them. */}
+          <h1
+            id="hero-heading"
+            className="mt-5 font-[family-name:var(--font-display)] text-display-medium text-balance text-[color:var(--hero-photo-ink)] xl:text-display-large"
+          >
+            {heroContent.headline}{" "}
+            <span className="text-[color:var(--hero-photo-accent)]">
+              {heroContent.headlineAccent}
+            </span>
+          </h1>
 
-            <p className="flex items-center gap-3 text-label-small text-[color:var(--hero-ink-subtle)] uppercase">
-              <span aria-hidden className="h-px w-8 bg-current opacity-70" />
-              Chartered Accountants · {brand.locale.country}
-            </p>
+          <p className="max-w-prose-measure mt-6 text-body-large text-[color:var(--hero-photo-ink-muted)]">
+            {heroContent.body}
+          </p>
 
-            <h1
-              id="hero-heading"
-              className="mt-6 font-[family-name:var(--font-display)] text-display-large text-[color:var(--hero-ink)]"
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <Link
+              href={routes.contact()}
+              className={cn(
+                buttonVariants({ variant: "primary", size: "lg" }),
+                "group w-full sm:w-auto",
+              )}
             >
-              Audit, tax and advisory,{" "}
-              <em className="text-[color:var(--hero-accent)] not-italic">
-                <span className="italic">explained plainly.</span>
-              </em>
-            </h1>
+              Book a Consultation
+              <ArrowRight
+                aria-hidden
+                className="size-4 transition-transform motion-safe:group-hover:translate-x-1"
+              />
+            </Link>
 
-            <p className="mt-6 max-w-[52ch] text-body-large text-[color:var(--hero-ink-muted)]">
-              We handle the statutory work a business in Nepal has to get right — audit,
-              income tax, VAT and TDS, and the filings that follow — and we tell you what
-              the numbers mean in language you can act on.
-            </p>
-
-            <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
-              <Link
-                href={routes.contact()}
-                className={cn(
-                  buttonVariants({ variant: "inverse", size: "lg" }),
-                  "w-full sm:w-auto",
-                )}
-              >
-                {vocabulary.actions.book}
-              </Link>
-
-              {/* A text link, not a second button. Two filled CTAs make the
-                  visitor choose, and §D.6 row 2 is explicit: one primary action. */}
-              <Link
-                href={routes.services()}
-                className="group inline-flex min-h-11 items-center gap-2 self-start text-label-large text-[color:var(--hero-ink)] sm:self-auto"
-              >
-                <span className="relative">
-                  {vocabulary.actions.viewAllServices}
-                  <span
-                    aria-hidden
-                    className="absolute inset-x-0 -bottom-1 h-px origin-left scale-x-0 bg-[color:var(--hero-accent)] transition-transform duration-300 group-hover:scale-x-100"
-                  />
-                </span>
-                <ArrowRight
-                  aria-hidden
-                  className="size-4 transition-transform motion-safe:group-hover:translate-x-1"
-                />
-              </Link>
-            </div>
-
-            <CredentialLine />
+            {/* An outlined button, not a text link. The reference gives the two
+                actions equal weight and the fill is what separates them; §D.6's
+                "one primary action" is satisfied by the fill, not by demoting
+                the second to a link. */}
+            <Link
+              href={routes.services()}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "w-full border-primary text-primary hover:bg-primary/5 sm:w-auto",
+              )}
+            >
+              Explore Our Services
+            </Link>
           </div>
 
-          <div className="lg:col-span-5">
-            <PracticeIndex />
-          </div>
+          <TrustMarkers />
         </div>
       </Container>
 
-      {/* Hairline seam into the credential marquee, so the deep ground ends on a
-          drawn line rather than a hard colour change. */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[color:var(--hero-rule)] to-transparent"
-      />
+      {/* The phone and tablet composition of the same photograph. `aria-hidden`
+          and empty alt: it is atmosphere, and every fact it carries is already
+          written above it in text. */}
+      <div aria-hidden className="lg:hidden">
+        <AssetImage
+          asset={withAlt(assets.heroLandscape, "")}
+          sizes="100vw"
+          priority
+          rounded={false}
+        />
+      </div>
     </section>
   );
 }
 
-/**
- * The ruled index of disciplines. Reads the same `services` list the grid below
- * uses, so the two can never disagree about what the firm does.
- */
-function PracticeIndex() {
-  return (
-    <div className="rounded-xl border border-[color:var(--hero-rule)] bg-white/[0.03] p-5 backdrop-blur-[1px] sm:p-6">
-      <p className="text-label-small text-[color:var(--hero-ink-subtle)] uppercase">
-        {vocabulary.sections.services}
-      </p>
+const TRUST_ICONS = {
+  registration: BadgeCheck,
+  clients: Users,
+  experience: BarChart3,
+} as const satisfies Record<HeroTrustMarker["icon"], unknown>;
 
-      <ul className="mt-4 flex flex-col">
-        {services.map((service, index) => (
-          <li key={service.slug}>
-            <Link
-              href={routes.service(service.slug)}
-              className="group flex items-baseline gap-4 border-t border-[color:var(--hero-rule)] py-3 first:border-t-0 first:pt-0"
+/**
+ * The three trust markers.
+ *
+ * A `<ul>`, because it is a list of three peer claims and a screen reader
+ * should be told how many there are before the first one.
+ *
+ * The icons are decorative and marked so: each sits beside its own label, and
+ * announcing "badge check, Registered with ICAN" adds a word the reader did not
+ * need. Colour is never the only carrier — every marker is readable with the
+ * icons stripped out entirely.
+ */
+function TrustMarkers() {
+  return (
+    <ul className="mt-10 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-3 sm:gap-y-0 lg:mt-12 lg:gap-x-8">
+      {heroContent.trust.map((marker) => {
+        const Icon = TRUST_ICONS[marker.icon];
+        return (
+          <li key={marker.lines.join(" ")} className="flex items-start gap-3">
+            <span
+              aria-hidden
+              className="grid size-10 shrink-0 place-items-center rounded-full border border-primary/35 text-primary"
             >
-              <span
-                aria-hidden
-                className="font-[family-name:var(--font-mono)] text-label-small text-[color:var(--hero-ink-subtle)]"
-              >
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <span className="flex-1 text-title-medium text-[color:var(--hero-ink)] transition-colors group-hover:text-[color:var(--hero-accent)]">
-                {service.name}
-              </span>
-              <ArrowRight
-                aria-hidden
-                className="size-3.5 shrink-0 translate-y-0.5 text-[color:var(--hero-ink-subtle)] opacity-0 transition-all group-hover:opacity-100 motion-safe:group-hover:translate-x-0.5"
-              />
-            </Link>
+              <Icon className="size-[18px]" />
+            </span>
+            <span className="text-body-small leading-snug text-balance text-[color:var(--hero-photo-ink-muted)]">
+              {marker.lines.map((line, i) => (
+                <span key={line} className="block">
+                  {i === 0 ? (
+                    <span className="font-medium text-on-surface">{line}</span>
+                  ) : (
+                    line
+                  )}
+                </span>
+              ))}
+            </span>
           </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-/**
- * ICAN registration and year established. Both are verifiable facts, so both are
- * `null` until the firm confirms them and the whole line disappears rather than
- * leaving a stray separator (CLAUDE.md §3.5).
- */
-function CredentialLine() {
-  const items: string[] = [];
-  if (isPresent(brand.icanRegistrationNumber)) {
-    items.push(`${vocabulary.labels.icanRegistration} ${brand.icanRegistrationNumber}`);
-  }
-  if (isPresent(brand.establishedYear)) {
-    items.push(`${vocabulary.labels.established} ${brand.establishedYear}`);
-  }
-  if (items.length === 0) return null;
-
-  return (
-    <p className="tabular mt-9 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-[color:var(--hero-rule)] pt-5 text-body-small text-[color:var(--hero-ink-subtle)]">
-      {items.map((item, index) => (
-        <span key={item} className="flex items-center gap-3">
-          {index > 0 ? <span aria-hidden>·</span> : null}
-          {item}
-        </span>
-      ))}
-    </p>
+        );
+      })}
+    </ul>
   );
 }

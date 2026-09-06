@@ -32,7 +32,7 @@ export function ServiceInclusions({
   if (inclusions.length === 0) return null;
 
   return (
-    <Section labelledBy="included-heading" ground="muted" index="02">
+    <Section labelledBy="included-heading" ground="muted">
       <SectionHeading
         id="included-heading"
         eyebrow="Scope"

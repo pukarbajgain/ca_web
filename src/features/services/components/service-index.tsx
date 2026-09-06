@@ -39,7 +39,7 @@ export function ServiceIndex({ services }: { services: readonly Service[] }) {
   if (services.length === 0) return null;
 
   return (
-    <Section labelledBy="service-index-heading" ground="muted" index="01">
+    <Section labelledBy="service-index-heading" ground="muted">
       <SectionHeading
         id="service-index-heading"
         eyebrow={vocabulary.sections.services}

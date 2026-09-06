@@ -27,7 +27,7 @@ export function OtherServices({ services }: { services: readonly ServiceSummary[
   if (services.length === 0) return null;
 
   return (
-    <Section labelledBy="other-services-heading" size="compact" index="06">
+    <Section labelledBy="other-services-heading" size="compact">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <SectionHeading
           id="other-services-heading"

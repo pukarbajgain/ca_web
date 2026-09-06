@@ -64,30 +64,29 @@ function fromSlot(
 /**
  * The registry.
  *
- * Brand marks live in `public/brand/` because they are genuinely code-adjacent —
- * the header cannot wait on a network fetch for the wordmark. **Everything else
+ * The logo lives in `public/brand/` because it is genuinely code-adjacent — the
+ * header cannot wait on a network fetch for it. **Everything else
  * that will eventually be a photograph is a placeholder here and a `media_asset`
  * reference later** (§J.4.6): real photography is uploaded through the admin, so
  * the firm's portraits never enter git and no code changes when they land.
  */
 export const assets = {
-  wordmark: fromSlot(imageSlots.wordmark, "/brand/wordmark.svg", "", {
-    isPlaceholder: true,
-  }),
-  monogram: fromSlot(imageSlots.monogram, "/brand/monogram.svg", "", {
-    isPlaceholder: true,
-  }),
+  /** The real logo. `isPlaceholder: false` — `pnpm assets:audit` must stop
+   *  listing it as outstanding now that the firm has supplied it. */
+  logo: fromSlot(imageSlots.logo, "/brand/logo.png", "", { isPlaceholder: false }),
 
-  heroLandscape: fromSlot(
-    imageSlots["hero-landscape"],
-    "/placeholders/hero-landscape.svg",
-    "",
-  ),
-  heroPortrait: fromSlot(
-    imageSlots["hero-portrait"],
-    "/placeholders/hero-portrait.svg",
-    "",
-  ),
+  /**
+   * The firm's own office. Supplied art, not a placeholder.
+   *
+   * The composition matters to the hero's layout: the left third of the frame
+   * is empty worktop, which is where the headline sits. The focal point is
+   * pushed right so that a narrow crop keeps the desk and the logo wall rather
+   * than centring on the blank half.
+   */
+  heroLandscape: fromSlot(imageSlots["hero-landscape"], "/brand/office-hero.png", "", {
+    isPlaceholder: false,
+    focal: { x: 0.68, y: 0.5 },
+  }),
 
   /** Fallback portrait, used when a person has no `photo_asset_id` yet. */
   partnerPortrait: fromSlot(

@@ -124,7 +124,7 @@ export function DownloadIndex({ read }: { read: DownloadListRead }) {
   })).filter((group) => group.items.length > 0);
 
   return (
-    <Section labelledBy="downloads-heading" ground="surface" index="01">
+    <Section labelledBy="downloads-heading" ground="surface">
       <h2 id="downloads-heading" className="sr-only">
         Downloads
       </h2>

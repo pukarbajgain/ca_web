@@ -1,8 +1,7 @@
-import { Monogram } from "@/components/brand/monogram";
-import { Wordmark } from "@/components/brand/wordmark";
 import { Container } from "@/components/layout/container";
 import { MobileActionBar } from "@/components/layout/mobile-action-bar";
 import { AssetImage } from "@/components/media/asset-image";
+import { BrandLogo } from "@/components/media/brand-logo";
 import { CredentialMarquee } from "@/components/sections/credential-marquee";
 import { InsightRail, InsightRailSkeleton } from "@/components/sections/insight-rail";
 import { Offices } from "@/components/sections/offices";
@@ -24,7 +23,7 @@ import { assets, unreplacedAssets, withAlt } from "@/lib/assets";
 import { brand, type Office, type Person, type Stat } from "@/lib/brand";
 import { imageSlots } from "@/lib/image-slots";
 
-import { DesignThemeProvider, ThemeToggle, ViewportSwitcher } from "./theme-controls";
+import { ViewportSwitcher } from "./theme-controls";
 
 import type { Metadata } from "next";
 
@@ -199,306 +198,298 @@ export default function DesignPage() {
   const unreplaced = unreplacedAssets();
 
   return (
-    <DesignThemeProvider>
-      <main id="main" className="pb-action-bar min-h-dvh bg-surface">
-        <Container className="flex flex-col gap-12 py-10">
-          <header className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-label-small text-on-surface-variant uppercase">
-                {brand.name} · Design system
-              </p>
-              <h1 className="mt-2 font-[family-name:var(--font-display)] text-display-small">
-                Tokens, type and components
-              </h1>
-              <p className="mt-2 max-w-[70ch] text-body-medium text-on-surface-variant">
-                Material 3 role tokens are canonical and are aliased onto the shadcn
-                names, so unmodified primitives render to spec. Dark mode overrides only
-                the <code className="font-[family-name:var(--font-mono)]">--md-*</code>{" "}
-                sources, which is why both utility families flip together.
-              </p>
-            </div>
-            <ThemeToggle />
-          </header>
-
-          <Block
-            id="viewports"
-            title="Responsive review"
-            note="The live site at the four widths the CI responsive gate asserts. If a layout is wrong here, the gate will fail — and vice versa."
-          >
-            <ViewportSwitcher />
-          </Block>
-
-          <Block id="colour" title="Colour roles">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {ROLE_SWATCHES.map((swatch) => (
-                <div
-                  key={swatch.label}
-                  className={`flex h-20 items-end rounded-lg p-3 text-label-medium ${swatch.className}`}
-                >
-                  {swatch.label}
-                </div>
-              ))}
-            </div>
-          </Block>
-
-          <Block
-            id="surfaces"
-            title="Surfaces"
-            note="The elevation ladder. `hero-ground` is deliberately fixed across both schemes — see site.css."
-          >
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {SURFACE_SWATCHES.map((swatch) => (
-                <div
-                  key={swatch.label}
-                  className={`flex h-20 items-end rounded-lg border border-outline-variant p-3 text-label-medium ${swatch.className}`}
-                >
-                  {swatch.label}
-                </div>
-              ))}
-            </div>
-          </Block>
-
-          <Block
-            id="type"
-            title="Type scale"
-            note="Every step is clamp()-driven and in rem, so it scales continuously between 380px and 1280px and respects browser font scaling. Resize the window to see it move."
-          >
-            <div className="flex flex-col gap-3">
-              {TYPE_STEPS.map((step) => (
-                <div key={step.label} className="flex flex-wrap items-baseline gap-4">
-                  <span className="w-36 shrink-0 font-[family-name:var(--font-mono)] text-label-small text-on-surface-variant">
-                    {step.label}
-                  </span>
-                  <span
-                    className={`${step.className} ${step.label.startsWith("display") || step.label.startsWith("headline") ? "font-[family-name:var(--font-display)]" : ""} text-on-surface`}
-                  >
-                    Audit, tax and advisory
-                  </span>
-                </div>
-              ))}
-              <p className="mt-2 font-[family-name:var(--font-mono)] text-body-medium text-on-surface-variant">
-                Mono · tabular figures: <span className="tabular">1,204,556.00</span>
-              </p>
-            </div>
-          </Block>
-
-          <Block
-            id="brand"
-            title="Brand marks"
-            note="Inline SVG using currentColor, so both marks follow the theme."
-          >
-            <div className="flex flex-wrap items-center gap-8">
-              <Wordmark className="h-10 w-auto text-primary" />
-              <Wordmark className="h-10 w-auto text-on-surface" />
-              <Monogram className="size-12 text-primary" />
-              <div className="rounded-lg bg-[var(--hero-ground)] p-4">
-                <Wordmark className="h-8 w-auto text-[color:var(--hero-ink)]" />
-              </div>
-            </div>
-          </Block>
-
-          <Block
-            id="buttons"
-            title="Buttons"
-            note="Every variant carries `pointer-coarse:min-h-11`, so touch targets meet 44px without inflating desktop density."
-          >
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <Button variant="primary">Book a consultation</Button>
-                <Button variant="tonal">Tonal</Button>
-                <Button variant="outline">Outline</Button>
-                <Button variant="ghost">Ghost</Button>
-                <Button variant="link">Link</Button>
-                <Button disabled>Disabled</Button>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Button size="sm">Small</Button>
-                <Button size="md">Medium</Button>
-                <Button size="lg">Large</Button>
-              </div>
-              <div className="rounded-lg bg-[var(--hero-ground)] p-4">
-                <Button variant="inverse">On the deep ground</Button>
-              </div>
-            </div>
-          </Block>
-
-          <Block id="badges" title="Badges">
-            <div className="flex flex-wrap items-center gap-3">
-              <Badge>Neutral</Badge>
-              <Badge variant="primary">Primary</Badge>
-              <Badge variant="accent">Accent</Badge>
-              <Badge variant="outline">Outline</Badge>
-            </div>
-          </Block>
-
-          <Block id="cards" title="Card, heading and accordion">
-            <div className="grid gap-6 lg:grid-cols-2">
-              <Card>
-                <CardBody>
-                  <CardTitle>Audit &amp; assurance</CardTitle>
-                  <p className="text-body-medium text-on-surface-variant">
-                    Statutory and special-purpose audits under Nepal Standards on
-                    Auditing, with findings you can act on.
-                  </p>
-                </CardBody>
-                <CardFooter>
-                  <Button size="sm" variant="tonal">
-                    Read more
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              <div className="flex flex-col gap-8">
-                <SectionHeading
-                  id="design-heading-sample"
-                  eyebrow="Section heading"
-                  title="Eyebrow rule, display heading, lede"
-                  lede="The same component drives every section on the site, so heading treatment cannot drift between them."
-                />
-                <Accordion>
-                  <AccordionItem value="one">
-                    <AccordionTrigger>How are your fees set?</AccordionTrigger>
-                    <AccordionPanel>
-                      Fees are agreed in writing before work begins, based on scope and
-                      complexity — never on a percentage of turnover.
-                    </AccordionPanel>
-                  </AccordionItem>
-                  <AccordionItem value="two">
-                    <AccordionTrigger>Do you work outside Kathmandu?</AccordionTrigger>
-                    <AccordionPanel>
-                      Yes. Most work is remote, with fieldwork scheduled on site where the
-                      engagement requires it.
-                    </AccordionPanel>
-                  </AccordionItem>
-                </Accordion>
-              </div>
-            </div>
-          </Block>
-
-          <Block
-            id="skeletons"
-            title="Skeletons"
-            note="Shape-matched to what they replace. A fallback that does not match its target trades a spinner for a layout shift."
-          >
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-6 w-full" />
-              <Skeleton className="aspect-[16/9] w-full" />
-            </div>
-            <div className="mt-6 rounded-xl border border-dashed border-outline-variant">
-              <InsightRailSkeleton />
-            </div>
-          </Block>
-
-          <Block
-            id="slots"
-            title="Image slots"
-            note="Every slot has a locked ratio and declared intrinsic size, so replacing a placeholder with real art can never shift the layout."
-          >
-            <ScrollX label="Image slot specifications">
-              <table className="w-full min-w-[36rem] text-left text-body-small">
-                <thead className="text-label-small text-on-surface-variant uppercase">
-                  <tr>
-                    <th scope="col" className="py-2 pr-4">
-                      Slot
-                    </th>
-                    <th scope="col" className="py-2 pr-4">
-                      Ratio
-                    </th>
-                    <th scope="col" className="py-2 pr-4">
-                      Intrinsic
-                    </th>
-                    <th scope="col" className="py-2">
-                      Purpose
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="text-on-surface-variant">
-                  {Object.values(imageSlots).map((slot) => (
-                    <tr key={slot.name} className="border-t border-outline-variant">
-                      <td className="py-2 pr-4 font-[family-name:var(--font-mono)] text-on-surface">
-                        {slot.name}
-                      </td>
-                      <td className="tabular py-2 pr-4">
-                        {slot.ratio[0]}:{slot.ratio[1]}
-                      </td>
-                      <td className="tabular py-2 pr-4">
-                        {slot.vector
-                          ? "SVG"
-                          : `${slot.intrinsic.width}×${slot.intrinsic.height}`}
-                      </td>
-                      <td className="py-2">{slot.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </ScrollX>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <AssetImage
-                asset={withAlt(assets.partnerPortrait, "")}
-                sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
-              />
-              <AssetImage
-                asset={assets.officeExterior}
-                sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
-              />
-              <AssetImage
-                asset={assets.articleCover}
-                sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
-              />
-              <AssetImage
-                asset={assets.heroLandscape}
-                sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
-              />
-            </div>
-
-            <p className="mt-4 text-body-small text-on-surface-variant">
-              {unreplaced.length} of {unreplaced.length} slots still hold generated art.
-              Run{" "}
-              <code className="font-[family-name:var(--font-mono)]">
-                pnpm assets:audit
-              </code>{" "}
-              for the handover checklist.
+    <main id="main" className="pb-action-bar min-h-dvh bg-surface">
+      <Container className="flex flex-col gap-12 py-10">
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-label-small text-on-surface-variant uppercase">
+              {brand.name} · Design system
             </p>
-          </Block>
+            <h1 className="mt-2 font-[family-name:var(--font-display)] text-display-small">
+              Tokens, type and components
+            </h1>
+            <p className="mt-2 max-w-[70ch] text-body-medium text-on-surface-variant">
+              Material 3 role tokens are canonical and are aliased onto the shadcn names,
+              so unmodified primitives render to spec. Dark mode overrides only the{" "}
+              <code className="font-[family-name:var(--font-mono)]">--md-*</code> sources,
+              which is why both utility families flip together.
+            </p>
+          </div>
+        </header>
 
-          <Block
-            id="honest-degradation"
-            title="Honest degradation — the populated branch"
-            note="These four sections render nothing on the live site, because the firm has published no statistics, people or offices. Sample data is supplied here so the styled state stays reviewable. Nothing below is a claim; this page is noindex."
-          >
-            <div className="flex flex-col gap-6 rounded-xl border border-dashed border-outline-variant p-4">
-              <StatsBand stats={SAMPLE_STATS} />
-              <PeopleRail people={SAMPLE_PEOPLE} />
-              <Offices offices={SAMPLE_OFFICES} />
-              <InsightRail
-                articles={[
-                  {
-                    slug: "sample-note",
-                    title: "Sample guidance note",
-                    excerpt:
-                      "What the article card looks like once the insights endpoint ships in Phase 2.",
-                    publishedAt: "2026-08-12T10:00:00+05:45",
-                    updatedAt: "2026-09-01T10:00:00+05:45",
-                    topic: "Income tax",
-                    author: "CA Sample Partner, FCA",
-                    reviewedBy: "CA Sample Reviewer, FCA",
-                  },
-                ]}
-              />
+        <Block
+          id="viewports"
+          title="Responsive review"
+          note="The live site at the four widths the CI responsive gate asserts. If a layout is wrong here, the gate will fail — and vice versa."
+        >
+          <ViewportSwitcher />
+        </Block>
+
+        <Block id="colour" title="Colour roles">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {ROLE_SWATCHES.map((swatch) => (
+              <div
+                key={swatch.label}
+                className={`flex h-20 items-end rounded-lg p-3 text-label-medium ${swatch.className}`}
+              >
+                {swatch.label}
+              </div>
+            ))}
+          </div>
+        </Block>
+
+        <Block
+          id="surfaces"
+          title="Surfaces"
+          note="The elevation ladder. `hero-ground` is deliberately fixed across both schemes — see site.css."
+        >
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {SURFACE_SWATCHES.map((swatch) => (
+              <div
+                key={swatch.label}
+                className={`flex h-20 items-end rounded-lg border border-outline-variant p-3 text-label-medium ${swatch.className}`}
+              >
+                {swatch.label}
+              </div>
+            ))}
+          </div>
+        </Block>
+
+        <Block
+          id="type"
+          title="Type scale"
+          note="Every step is clamp()-driven and in rem, so it scales continuously between 380px and 1280px and respects browser font scaling. Resize the window to see it move."
+        >
+          <div className="flex flex-col gap-3">
+            {TYPE_STEPS.map((step) => (
+              <div key={step.label} className="flex flex-wrap items-baseline gap-4">
+                <span className="w-36 shrink-0 font-[family-name:var(--font-mono)] text-label-small text-on-surface-variant">
+                  {step.label}
+                </span>
+                <span
+                  className={`${step.className} ${step.label.startsWith("display") || step.label.startsWith("headline") ? "font-[family-name:var(--font-display)]" : ""} text-on-surface`}
+                >
+                  Audit, tax and advisory
+                </span>
+              </div>
+            ))}
+            <p className="mt-2 font-[family-name:var(--font-mono)] text-body-medium text-on-surface-variant">
+              Mono · tabular figures: <span className="tabular">1,204,556.00</span>
+            </p>
+          </div>
+        </Block>
+
+        <Block
+          id="brand"
+          title="Brand marks"
+          note="Inline SVG using currentColor, so both marks follow the theme."
+        >
+          <div className="flex flex-wrap items-center gap-8">
+            <BrandLogo priority={false} className="h-14" />
+            <div className="rounded-lg bg-[var(--hero-ground)] p-4">
+              <BrandLogo priority={false} className="h-12" />
             </div>
-          </Block>
+          </div>
+        </Block>
 
-          <Block id="marquee" title="Credential marquee">
-            <CredentialMarquee />
-          </Block>
-        </Container>
+        <Block
+          id="buttons"
+          title="Buttons"
+          note="Every variant carries `pointer-coarse:min-h-11`, so touch targets meet 44px without inflating desktop density."
+        >
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <Button variant="primary">Book a consultation</Button>
+              <Button variant="tonal">Tonal</Button>
+              <Button variant="outline">Outline</Button>
+              <Button variant="ghost">Ghost</Button>
+              <Button variant="link">Link</Button>
+              <Button disabled>Disabled</Button>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button size="sm">Small</Button>
+              <Button size="md">Medium</Button>
+              <Button size="lg">Large</Button>
+            </div>
+            <div className="rounded-lg bg-[var(--hero-ground)] p-4">
+              <Button variant="inverse">On the deep ground</Button>
+            </div>
+          </div>
+        </Block>
 
-        {/* The action bar is fixed and phone-only; shown here so its layout can
+        <Block id="badges" title="Badges">
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge>Neutral</Badge>
+            <Badge variant="primary">Primary</Badge>
+            <Badge variant="accent">Accent</Badge>
+            <Badge variant="outline">Outline</Badge>
+          </div>
+        </Block>
+
+        <Block id="cards" title="Card, heading and accordion">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card>
+              <CardBody>
+                <CardTitle>Audit &amp; assurance</CardTitle>
+                <p className="text-body-medium text-on-surface-variant">
+                  Statutory and special-purpose audits under Nepal Standards on Auditing,
+                  with findings you can act on.
+                </p>
+              </CardBody>
+              <CardFooter>
+                <Button size="sm" variant="tonal">
+                  Read more
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <div className="flex flex-col gap-8">
+              <SectionHeading
+                id="design-heading-sample"
+                eyebrow="Section heading"
+                title="Eyebrow rule, display heading, lede"
+                lede="The same component drives every section on the site, so heading treatment cannot drift between them."
+              />
+              <Accordion>
+                <AccordionItem value="one">
+                  <AccordionTrigger>How are your fees set?</AccordionTrigger>
+                  <AccordionPanel>
+                    Fees are agreed in writing before work begins, based on scope and
+                    complexity — never on a percentage of turnover.
+                  </AccordionPanel>
+                </AccordionItem>
+                <AccordionItem value="two">
+                  <AccordionTrigger>Do you work outside Kathmandu?</AccordionTrigger>
+                  <AccordionPanel>
+                    Yes. Most work is remote, with fieldwork scheduled on site where the
+                    engagement requires it.
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </div>
+        </Block>
+
+        <Block
+          id="skeletons"
+          title="Skeletons"
+          note="Shape-matched to what they replace. A fallback that does not match its target trades a spinner for a layout shift."
+        >
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="aspect-[16/9] w-full" />
+          </div>
+          <div className="mt-6 rounded-xl border border-dashed border-outline-variant">
+            <InsightRailSkeleton />
+          </div>
+        </Block>
+
+        <Block
+          id="slots"
+          title="Image slots"
+          note="Every slot has a locked ratio and declared intrinsic size, so replacing a placeholder with real art can never shift the layout."
+        >
+          <ScrollX label="Image slot specifications">
+            <table className="w-full min-w-[36rem] text-left text-body-small">
+              <thead className="text-label-small text-on-surface-variant uppercase">
+                <tr>
+                  <th scope="col" className="py-2 pr-4">
+                    Slot
+                  </th>
+                  <th scope="col" className="py-2 pr-4">
+                    Ratio
+                  </th>
+                  <th scope="col" className="py-2 pr-4">
+                    Intrinsic
+                  </th>
+                  <th scope="col" className="py-2">
+                    Purpose
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="text-on-surface-variant">
+                {Object.values(imageSlots).map((slot) => (
+                  <tr key={slot.name} className="border-t border-outline-variant">
+                    <td className="py-2 pr-4 font-[family-name:var(--font-mono)] text-on-surface">
+                      {slot.name}
+                    </td>
+                    <td className="tabular py-2 pr-4">
+                      {slot.ratio[0]}:{slot.ratio[1]}
+                    </td>
+                    <td className="tabular py-2 pr-4">
+                      {slot.vector
+                        ? "SVG"
+                        : `${slot.intrinsic.width}×${slot.intrinsic.height}`}
+                    </td>
+                    <td className="py-2">{slot.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollX>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <AssetImage
+              asset={withAlt(assets.partnerPortrait, "")}
+              sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
+            />
+            <AssetImage
+              asset={assets.officeExterior}
+              sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
+            />
+            <AssetImage
+              asset={assets.articleCover}
+              sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
+            />
+            <AssetImage
+              asset={assets.heroLandscape}
+              sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
+            />
+          </div>
+
+          <p className="mt-4 text-body-small text-on-surface-variant">
+            {unreplaced.length} of {unreplaced.length} slots still hold generated art. Run{" "}
+            <code className="font-[family-name:var(--font-mono)]">pnpm assets:audit</code>{" "}
+            for the handover checklist.
+          </p>
+        </Block>
+
+        <Block
+          id="honest-degradation"
+          title="Honest degradation — the populated branch"
+          note="These four sections render nothing on the live site, because the firm has published no statistics, people or offices. Sample data is supplied here so the styled state stays reviewable. Nothing below is a claim; this page is noindex."
+        >
+          <div className="flex flex-col gap-6 rounded-xl border border-dashed border-outline-variant p-4">
+            <StatsBand stats={SAMPLE_STATS} />
+            <PeopleRail people={SAMPLE_PEOPLE} />
+            <Offices offices={SAMPLE_OFFICES} />
+            <InsightRail
+              articles={[
+                {
+                  slug: "sample-note",
+                  title: "Sample guidance note",
+                  excerpt:
+                    "What the article card looks like once the insights endpoint ships in Phase 2.",
+                  publishedAt: "2026-08-12T10:00:00+05:45",
+                  updatedAt: "2026-09-01T10:00:00+05:45",
+                  topic: "Income tax",
+                  author: "CA Sample Partner, FCA",
+                  reviewedBy: "CA Sample Reviewer, FCA",
+                },
+              ]}
+            />
+          </div>
+        </Block>
+
+        <Block id="marquee" title="Credential marquee">
+          <CredentialMarquee />
+        </Block>
+      </Container>
+
+      {/* The action bar is fixed and phone-only; shown here so its layout can
             be reviewed without opening dev tools. */}
-        <MobileActionBar />
-      </main>
-    </DesignThemeProvider>
+      <MobileActionBar />
+    </main>
   );
 }

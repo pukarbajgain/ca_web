@@ -20,17 +20,11 @@ import type { ReactNode } from "react";
  * firm's facts are unconfirmed, the alternation is applied at the *call site* in
  * `page.tsx` — the rhythm has to be right for what actually renders, not for the
  * full section list.
- *
- * `index` prints a monospaced section number. That is not decoration for its own
- * sake: a ruled, numbered sequence is the visual language of a ledger, which is
- * this practice's own material, and it gives the page a spine that a stack of
- * centred headings does not have.
  */
 export function Section({
   id,
   labelledBy,
   ground = "surface",
-  index,
   size = "default",
   className,
   containerClassName,
@@ -42,8 +36,6 @@ export function Section({
    *  noise in a screen reader's landmark list. */
   labelledBy: string;
   ground?: "surface" | "muted" | "deep";
-  /** Two-digit section number, e.g. "02". Rendered in the left rail from `lg`. */
-  index?: string;
   size?: "default" | "compact";
   className?: string;
   containerClassName?: string;
@@ -68,24 +60,7 @@ export function Section({
         className,
       )}
     >
-      <Container className={containerClassName}>
-        {index ? (
-          /* Absolutely positioned so it never affects the content's measure, and
-           * only from `xl` where there is genuine gutter to put it in. Below that
-           * it would be either cramped or a fake indent.
-           *
-           * The opacity is 0.8, not the 0.45 this started at: an 11px numeral is
-           * small text and gets no contrast exemption, and 0.45 measured 2.2:1
-           * against the page ground. The axe gate caught it. */
-          <span
-            aria-hidden
-            className="pointer-events-none absolute top-16 left-8 hidden font-[family-name:var(--font-mono)] text-label-small text-on-surface-variant opacity-80 xl:block"
-          >
-            {index}
-          </span>
-        ) : null}
-        {children}
-      </Container>
+      <Container className={containerClassName}>{children}</Container>
     </section>
   );
 }

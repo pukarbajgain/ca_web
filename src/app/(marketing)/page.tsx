@@ -1,17 +1,16 @@
 import { CredentialMarquee } from "@/components/sections/credential-marquee";
 import { CtaBand } from "@/components/sections/cta-band";
 import { Faq } from "@/components/sections/faq";
-import { FirmIntro } from "@/components/sections/firm-intro";
 import { Hero } from "@/components/sections/hero";
-import { HowWeWork } from "@/components/sections/how-we-work";
 import { InsightRail } from "@/components/sections/insight-rail";
 import { Offices } from "@/components/sections/offices";
 import { PeopleRail } from "@/components/sections/people-rail";
-import { Sectors } from "@/components/sections/sectors";
 import { ServiceGrid } from "@/components/sections/service-grid";
 import { StatsBand } from "@/components/sections/stats-band";
 import { JsonLd } from "@/components/seo/json-ld";
 import { faqs, services } from "@/config/content";
+import { toInsightSummaries } from "@/features/insights/rail";
+import { getArticles } from "@/features/insights/service";
 import { readSiteSettings } from "@/features/settings/service";
 import { brand } from "@/lib/brand";
 import { faqJsonLd, serviceListJsonLd } from "@/lib/seo";
@@ -24,11 +23,18 @@ import { faqJsonLd, serviceListJsonLd } from "@/lib/seo";
  * section that owns it, which is why several of these render nothing today and
  * the page still reads correctly.
  *
- * Section order follows §D.6 exactly. Two rows of that table are deliberately
- * absent from this file: the utility bar and header (rows 1–2) and the footer
- * (row 16) belong to the route-group layout, and the compliance-deadline widget
- * (row 12) needs a Bikram Sambat calendar and a statutory deadline table that
- * neither repo has yet — shipping a wrong deadline is worse than shipping none.
+ * **The homepage is deliberately shorter than §D.6's full section list.** About
+ * the firm, How we work and Sectors we serve were removed from it once each had
+ * a dedicated page: repeating them here made the landing page long and made the
+ * pages that own them feel redundant. They are unchanged on `/about`,
+ * `/services` and `/contact`. What is left is the first-impression journey and
+ * nothing else — positioning, credibility, what the firm does, recent guidance,
+ * the common questions, and a way to start a conversation.
+ *
+ * The utility bar and header (§D.6 rows 1–2) and the footer (row 16) belong to
+ * the route-group layout, and the compliance-deadline widget (row 12) needs a
+ * Bikram Sambat calendar and a statutory deadline table that neither repo has
+ * yet — shipping a wrong deadline is worse than shipping none.
  *
  * ISR with tags, per §D.1. The 300s floor is a backstop; the real freshness
  * mechanism is the tagged invalidation the backend triggers through
@@ -61,6 +67,18 @@ export default async function HomePage() {
    * than in whether the output happens to look the same this week.
    */
   const settings = await readSiteSettings();
+
+  /**
+   * Three most recent articles for the rail.
+   *
+   * An outage contributes an empty list and the rail renders nothing, which is
+   * the right degradation *here* and nowhere else: the rail is supplementary,
+   * so its absence claims nothing, whereas `/insights` says plainly that it
+   * could not load. The failure is already logged with its request id by the
+   * fetcher (CLAUDE.md §3.8c).
+   */
+  const articles = await getArticles({ pageSize: 3 });
+  const insights = articles.status === "ok" ? toInsightSummaries(articles.items) : [];
   const offices =
     settings.status === "ok"
       ? settings.settings.offices
@@ -85,16 +103,10 @@ export default async function HomePage() {
       <CredentialMarquee />
       {/* Renders nothing until real, sourced figures exist (CLAUDE.md §3.5). */}
       <StatsBand />
-      <FirmIntro />
       <ServiceGrid />
-      <HowWeWork />
-      <Sectors />
       {/* Renders nothing until real people consent to being listed. */}
       <PeopleRail />
-      {/* `GET /public/articles` is Phase 2 (API_CONTRACT.md §6). The section is
-          built and tested; it is handed an empty list rather than a fabricated
-          one, and gains its data with a one-line change when the endpoint ships. */}
-      <InsightRail articles={[]} />
+      <InsightRail articles={insights} />
       <Faq />
       <Offices offices={offices} />
       <CtaBand />

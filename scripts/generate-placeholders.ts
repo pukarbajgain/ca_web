@@ -3,7 +3,7 @@
  *
  * Run with `pnpm assets:generate`. Regenerating is idempotent, so the files are
  * committed (a build must not depend on a codegen step) but are never
- * hand-edited — edit the geometry here or in `src/lib/brand-marks.ts` instead.
+ * hand-edited — edit the composition here instead.
  *
  * ── Why these look the way they do (ARCHITECTURE.md §J.4.3) ─────────────────
  * The brief is "intentional, but never mistaken for content". Two traps to
@@ -29,15 +29,6 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { brand } from "../src/lib/brand";
-import {
-  MONOGRAM_BADGE,
-  MONOGRAM_RULES,
-  MONOGRAM_RULE_HEIGHT,
-  MONOGRAM_VIEWBOX,
-  WORDMARK_TYPE,
-  WORDMARK_VIEWBOX,
-} from "../src/lib/brand-marks";
 import { imageSlots, type ImageSlot } from "../src/lib/image-slots";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -101,27 +92,6 @@ function ledgerRules(
 }
 
 /* ── One composition per raster slot ──────────────────────────────────────── */
-
-function heroComposition(slot: ImageSlot): string {
-  const { width: w, height: h } = slot.intrinsic;
-  const landscape = w >= h;
-  const r = Math.round(Math.min(w, h) * (landscape ? 0.42 : 0.46));
-  const cx = landscape ? Math.round(w * 0.72) : Math.round(w * 0.62);
-  const cy = landscape ? Math.round(h * 0.44) : Math.round(h * 0.36);
-  return svg(
-    w,
-    h,
-    [
-      `<rect width="${w}" height="${h}" fill="${c("ground")}"/>`,
-      ledgerRules(w, h, landscape ? 9 : 13, Math.round(w * 0.06)),
-      // A single large arc, clipped by the frame: one gesture, not a pattern.
-      `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c("deep")}" stroke-width="${Math.max(2, Math.round(w / 640))}" opacity="0.28"/>`,
-      `<circle cx="${cx}" cy="${cy}" r="${Math.round(r * 0.58)}" fill="${c("shape")}" opacity="0.5"/>`,
-      // Rule that anchors the arc to the baseline grid.
-      `<rect x="${Math.round(w * 0.06)}" y="${Math.round(h * 0.78)}" width="${Math.round(w * 0.34)}" height="${Math.max(3, Math.round(h / 220))}" rx="2" fill="${c("deep")}" opacity="0.55"/>`,
-    ].join(""),
-  );
-}
 
 function portraitComposition(slot: ImageSlot): string {
   const { width: w, height: h } = slot.intrinsic;
@@ -207,63 +177,20 @@ function coverComposition(slot: ImageSlot): string {
 
 function ogComposition(slot: ImageSlot): string {
   const { width: w, height: h } = slot.intrinsic;
-  const scale = 1.4;
-  const markX = Math.round(w * 0.5 - (64 * scale) / 2);
-  const markY = Math.round(h * 0.32);
   return svg(
     w,
     h,
     [
       `<rect width="${w}" height="${h}" fill="${c("ground")}"/>`,
       ledgerRules(w, h, 7, Math.round(w * 0.08), 0.7),
-      `<g transform="translate(${markX} ${markY}) scale(${scale})" fill="${c("deep")}">`,
-      `<rect x="${MONOGRAM_BADGE.x}" y="${MONOGRAM_BADGE.y}" width="${MONOGRAM_BADGE.size}" height="${MONOGRAM_BADGE.size}" rx="${MONOGRAM_BADGE.radius}" fill="none" stroke="${c("deep")}" stroke-width="${MONOGRAM_BADGE.strokeWidth}" opacity="${MONOGRAM_BADGE.opacity}"/>`,
-      MONOGRAM_RULES.map(
-        ([x, y, rw]) =>
-          `<rect x="${x}" y="${y}" width="${rw}" height="${MONOGRAM_RULE_HEIGHT}" rx="${MONOGRAM_RULE_HEIGHT / 2}"/>`,
-      ).join(""),
-      "</g>",
       `<rect x="${Math.round(w * 0.42)}" y="${Math.round(h * 0.68)}" width="${Math.round(w * 0.16)}" height="4" rx="2" fill="${c("deep")}" opacity="0.5"/>`,
     ].join(""),
   );
 }
 
-/* ── Brand marks (static copies; the inline JSX is the primary form) ──────── */
-
-function monogramFile(): string {
-  return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${MONOGRAM_VIEWBOX}" width="512" height="512" fill="currentColor" color="#0e4a52" role="img" aria-label="${brand.shortName}">`,
-    `<rect x="${MONOGRAM_BADGE.x}" y="${MONOGRAM_BADGE.y}" width="${MONOGRAM_BADGE.size}" height="${MONOGRAM_BADGE.size}" rx="${MONOGRAM_BADGE.radius}" fill="none" stroke="currentColor" stroke-width="${MONOGRAM_BADGE.strokeWidth}" opacity="${MONOGRAM_BADGE.opacity}"/>`,
-    MONOGRAM_RULES.map(
-      ([x, y, w]) =>
-        `<rect x="${x}" y="${y}" width="${w}" height="${MONOGRAM_RULE_HEIGHT}" rx="${MONOGRAM_RULE_HEIGHT / 2}"/>`,
-    ).join(""),
-    "</svg>",
-  ].join("");
-}
-
-function wordmarkFile(): string {
-  const scale = WORDMARK_TYPE.markSize / 64;
-  const escaped = brand.name.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${WORDMARK_VIEWBOX}" width="1000" height="200" fill="currentColor" color="#0e4a52" role="img" aria-label="${escaped}" data-placeholder="">`,
-    `<g transform="translate(0 ${WORDMARK_TYPE.markOffsetY}) scale(${scale})">`,
-    `<rect x="${MONOGRAM_BADGE.x}" y="${MONOGRAM_BADGE.y}" width="${MONOGRAM_BADGE.size}" height="${MONOGRAM_BADGE.size}" rx="${MONOGRAM_BADGE.radius}" fill="none" stroke="currentColor" stroke-width="${MONOGRAM_BADGE.strokeWidth}" opacity="${MONOGRAM_BADGE.opacity}"/>`,
-    MONOGRAM_RULES.map(
-      ([x, y, w]) =>
-        `<rect x="${x}" y="${y}" width="${w}" height="${MONOGRAM_RULE_HEIGHT}" rx="${MONOGRAM_RULE_HEIGHT / 2}"/>`,
-    ).join(""),
-    "</g>",
-    `<text x="${WORDMARK_TYPE.textX}" y="${WORDMARK_TYPE.textBaselineY}" font-family="${WORDMARK_TYPE.fontFamilyStatic}" font-size="${WORDMARK_TYPE.fontSize}" letter-spacing="${WORDMARK_TYPE.letterSpacing}">${escaped}</text>`,
-    "</svg>",
-  ].join("");
-}
-
 /* ── Emit ─────────────────────────────────────────────────────────────────── */
 
 const compositions: Record<string, (slot: ImageSlot) => string> = {
-  "hero-landscape": heroComposition,
-  "hero-portrait": heroComposition,
   "partner-portrait": portraitComposition,
   "office-exterior": officeComposition,
   "article-cover": coverComposition,
@@ -282,6 +209,4 @@ for (const [name, build] of Object.entries(compositions)) {
   const slot = imageSlots[name as keyof typeof imageSlots];
   write(`public/placeholders/${name}.svg`, build(slot));
 }
-write("public/brand/monogram.svg", monogramFile());
-write("public/brand/wordmark.svg", wordmarkFile());
 console.warn("Done.");

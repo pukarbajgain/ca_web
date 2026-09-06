@@ -124,6 +124,51 @@ function defineService(spec: ServiceSpec): ServiceItem {
  * business actually encounters them: the statutory obligation first, then the
  * recurring one, then the things that follow from having a company at all.
  */
+/**
+ * The landing hero.
+ *
+ * Copy and trust markers live here, not in the component, for the reason every
+ * other string on this site does: the firm edits its own words without going
+ * near JSX, and there is one place to check a claim.
+ *
+ * **Every line below is a claim the firm is making about itself**, which is
+ * exactly why it is data and not markup (CLAUDE.md §3.5). Nothing here is
+ * inferred or rounded up by the site; change the words and the page changes.
+ */
+export type HeroTrustMarker = {
+  readonly icon: "registration" | "clients" | "experience";
+  /**
+   * One string per rendered line.
+   *
+   * The breaks are authored rather than left to the container: at three
+   * markers across a 34rem column, natural wrapping put "Businesses" and
+   * "Across" on different lines from the design and the row stopped scanning
+   * as three peers. Short, deliberate lines also survive translation better
+   * than a width that happens to work in English.
+   */
+  readonly lines: readonly string[];
+};
+
+export const heroContent = {
+  /** Split so the accent can sit on the closing phrase without a nested span
+   *  in the middle of a sentence. */
+  headline: "Your Trusted Chartered Accountants",
+  headlineAccent: "in Nepal",
+  body:
+    "Audit, tax, compliance and advisory services for businesses, startups and " +
+    "individuals — delivered with clarity, commitment and practical solutions.",
+  trust: [
+    { icon: "registration", lines: ["Registered", "with ICAN"] },
+    { icon: "clients", lines: ["Trusted by", "Businesses Across", "Nepal & India"] },
+    { icon: "experience", lines: ["7+ Years", "of Professional", "Excellence"] },
+  ],
+} as const satisfies {
+  headline: string;
+  headlineAccent: string;
+  body: string;
+  trust: readonly HeroTrustMarker[];
+};
+
 export const services: readonly ServiceItem[] = [
   defineService({
     slug: "audit-and-assurance",

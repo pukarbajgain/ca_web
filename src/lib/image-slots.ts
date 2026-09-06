@@ -16,10 +16,8 @@
  */
 
 export type ImageSlotName =
-  | "wordmark"
-  | "monogram"
+  | "logo"
   | "hero-landscape"
-  | "hero-portrait"
   | "partner-portrait"
   | "office-exterior"
   | "article-cover"
@@ -42,39 +40,30 @@ export type ImageSlot = {
 };
 
 export const imageSlots = {
-  /** Free height, fixed cap-height. The viewBox ratio is the replacement contract. */
-  wordmark: {
-    name: "wordmark",
-    ratio: [1000, 200],
-    intrinsic: { width: 1000, height: 200 },
-    description: "Primary wordmark, header and footer. SVG using currentColor.",
-    vector: true,
-  },
-  monogram: {
-    name: "monogram",
-    ratio: [1, 1],
-    intrinsic: { width: 512, height: 512 },
-    description: "Square mark for the favicon, app icon and compact header.",
-    vector: true,
+  /**
+   * The firm's actual logo: the stacked lockup, mark over wordmark.
+   *
+   * Raster rather than vector, because that is the form it was supplied in.
+   * The ratio is measured from the file with its transparent padding trimmed
+   * off — untrimmed it was 2.000, and the padding is why an earlier draft
+   * rendered the wordmark too small to read inside a header-height box.
+   */
+  logo: {
+    name: "logo",
+    ratio: [411, 211],
+    intrinsic: { width: 1644, height: 844 },
+    description: "Primary logo lockup, header and footer. Transparent PNG.",
+    vector: false,
   },
 
   /**
-   * The hero art direction slots. Kept in the registry even though the landing
-   * hero is typographic (§D.6): interior pages and future campaigns need them,
-   * and the portrait crop is a *real* crop, not a squeezed landscape.
+   * The landing hero's photograph: the firm's own office, 2:1.
    */
   "hero-landscape": {
     name: "hero-landscape",
     ratio: [2, 1],
     intrinsic: { width: 2560, height: 1280 },
     description: "Wide hero art for tablet and desktop.",
-    vector: false,
-  },
-  "hero-portrait": {
-    name: "hero-portrait",
-    ratio: [3, 4],
-    intrinsic: { width: 1080, height: 1440 },
-    description: "Phone hero crop. A separate composition, not a scaled landscape.",
     vector: false,
   },
 

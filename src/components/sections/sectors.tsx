@@ -25,7 +25,7 @@ export function Sectors() {
   if (sectors.length === 0) return null;
 
   return (
-    <Section labelledBy="sectors-heading" ground="muted" index="04">
+    <Section labelledBy="sectors-heading" ground="muted">
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-4">
           <SectionHeading

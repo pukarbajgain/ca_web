@@ -104,7 +104,7 @@ export function InsightIndex({ read }: { read: ArticleListRead }) {
   }
 
   return (
-    <Section labelledBy="insights-heading" ground="surface" index="01">
+    <Section labelledBy="insights-heading" ground="surface">
       <h2 id="insights-heading" className="sr-only">
         Insights
       </h2>

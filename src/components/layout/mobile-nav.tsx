@@ -3,7 +3,7 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Menu, X } from "lucide-react";
 
-import { Wordmark } from "@/components/brand/wordmark";
+import { BrandLogo } from "@/components/media/brand-logo";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { isActivePath, legalNav, primaryNav } from "@/config/nav";
 import { brand, isPresent, mailHref, telHref } from "@/lib/brand";
@@ -61,7 +61,7 @@ export function MobileNav({ pathname }: { pathname: string }) {
         >
           <div className="flex items-center justify-between gap-4 border-b border-outline-variant p-4">
             <Dialog.Title className="sr-only">{vocabulary.nav.primary}</Dialog.Title>
-            <Wordmark className="h-7 w-auto text-primary" />
+            <BrandLogo priority={false} className="h-9" />
             <Dialog.Close
               render={
                 <Button

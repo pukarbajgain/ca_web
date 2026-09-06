@@ -1,98 +1,11 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
-import { ThemeProvider, useTheme } from "next-themes";
-import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
-
-/**
- * `attribute="data-theme"` is not a preference — it is what `globals.css`
- * actually keys on (`:root[data-theme="dark"]`, and a light choice guarded
- * against a dark OS preference via `:root:not([data-theme="light"])`). Using
- * next-themes' default `class` attribute would toggle a class nothing reads.
- *
- * `defaultTheme="system"` matches the design system's own default: stamping no
- * attribute is the third state, where `prefers-color-scheme` decides.
- */
-export function DesignThemeProvider({ children }: { children: ReactNode }) {
-  return (
-    <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
-      {children}
-    </ThemeProvider>
-  );
-}
-
-/**
- * True once React has hydrated, false during SSR and on the first client render.
- *
- * `useSyncExternalStore` rather than `useState` + `useEffect`: the effect form
- * calls `setState` synchronously in an effect body, which the React Compiler
- * lint rule rejects (it causes a cascading render) — and `useSyncExternalStore`
- * expresses the intent directly by giving React a different value for the
- * server snapshot than for the client one. The store never changes, so the
- * subscribe function is a no-op.
- */
-const neverChanges = () => () => {};
-function useIsHydrated(): boolean {
-  return useSyncExternalStore(
-    neverChanges,
-    () => true,
-    () => false,
-  );
-}
-
-const THEMES = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: Monitor },
-] as const;
-
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  /**
-   * next-themes cannot know the active theme on the server — the choice lives in
-   * localStorage and in the OS preference, neither of which the server can see.
-   * Deriving `aria-pressed` from `theme` during SSR therefore renders
-   * `aria-pressed="false"` on the server and `true` on the client, which React
-   * reports as a hydration mismatch and does not patch up.
-   *
-   * The fix is to render the *server's* view on the first client render too, and
-   * only then reconcile — `useIsHydrated` below. (The matching half of this is
-   * `suppressHydrationWarning` on `<html>` in the root layout, for the
-   * attributes next-themes writes there.)
-   */
-  const hydrated = useIsHydrated();
-
-  return (
-    <div
-      role="group"
-      aria-label="Colour scheme"
-      className="inline-flex rounded-lg border border-outline-variant p-1"
-    >
-      {THEMES.map((option) => {
-        const Icon = option.icon;
-        const active = hydrated && theme === option.value;
-        return (
-          <Button
-            key={option.value}
-            variant="ghost"
-            size="sm"
-            aria-pressed={active}
-            onClick={() => setTheme(option.value)}
-            className={cn(active && "bg-secondary-container text-on-secondary-container")}
-          >
-            <Icon aria-hidden />
-            {option.label}
-          </Button>
-        );
-      })}
-    </div>
-  );
-}
 
 /**
  * The viewport switcher.

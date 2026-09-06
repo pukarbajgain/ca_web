@@ -15,7 +15,7 @@ import { vocabulary } from "@/lib/vocabulary";
  * desperation to exactly the kind of client a practice wants. The invitation is a
  * first conversation with no obligation, which is also true.
  *
- * Reuses the hero's deep ground and ledger motif so the page opens and closes on
+ * Reuses the site's deep ground so the page closes on
  * the same note, and the section reads as the answer to the question the hero
  * asked. Left-aligned rather than centred: the whole page is left-aligned, and a
  * centred block at the end reads as a different site's component.
@@ -33,10 +33,6 @@ export function CtaBand() {
       aria-labelledby="cta-heading"
       className="relative isolate overflow-hidden bg-[var(--hero-ground)] text-[color:var(--hero-ink)]"
     >
-      <div
-        aria-hidden
-        className="ledger-rules pointer-events-none absolute inset-0 -z-10 opacity-70"
-      />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_80%_at_85%_50%,var(--hero-ground-2),transparent_70%)]"

@@ -39,9 +39,9 @@ export function AnnouncementBar({ messages }: { messages: readonly SiteMessage[]
             key={message.key}
             data-site-message={message.key}
             /* The pre-paint script may add `hidden` to this element before
-               React hydrates. That is an attribute mismatch by construction —
-               the same one `next-themes` creates on <html> — and this scopes
-               the warning to this element without silencing its children. */
+               React hydrates. That is an attribute mismatch by construction,
+               and this scopes the warning to this element without silencing
+               its children. */
             suppressHydrationWarning
             className={`${TONE_STRIP[message.tone]} border-b border-black/5`}
           >

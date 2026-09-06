@@ -16,9 +16,26 @@
  * has already defined better. `once_per_day` and `once_ever` outlive the tab and
  * live in `localStorage`.
  *
+ * **`always` is scoped to the page load, and it is the one that is not stored
+ * at all.** It means "come back when the page is loaded again" — so a dismissal
+ * is held in a module-level set, which a client-side navigation preserves and a
+ * reload destroys, because the module is re-evaluated. That is exactly the
+ * asked-for behaviour: closing it keeps it closed while you move around the
+ * site, and refreshing brings it back. Writing it to `sessionStorage` would
+ * survive the reload and writing nothing at all would make it reappear on the
+ * next link click, and neither is what "every time the page loads" means.
+ *
  * Nothing here is a tracking mechanism: the values are message ids and
  * timestamps, they never leave the device, and no request carries them.
  */
+
+/**
+ * Dismissals that last exactly one page load.
+ *
+ * Module scope is the storage. There is no API for clearing it because the
+ * thing that clears it is a page load, which is the semantic.
+ */
+const dismissedThisPageLoad = new Set<string>();
 
 import type { MessageFrequency } from "./types";
 
@@ -92,6 +109,7 @@ export function isActive(entry: number | undefined, now: number): boolean {
 
 export function isDismissed(key: string, now: number, storages: StoragePair): boolean {
   return (
+    dismissedThisPageLoad.has(key) ||
     isActive(readMap(storages.session)[key], now) ||
     isActive(readMap(storages.local)[key], now)
   );
@@ -100,10 +118,9 @@ export function isDismissed(key: string, now: number, storages: StoragePair): bo
 /**
  * Record a dismissal, in the store the frequency implies.
  *
- * `always` writes nothing at all. It means "show it again on the next page",
- * so the only state it needs is the component's own — persisting a value that
- * every reader is required to ignore would just be litter in the visitor's
- * browser.
+ * `always` is deliberately the one case that persists nothing: it is held in
+ * memory for this page load only (see the module note above), so it survives a
+ * client-side navigation and is gone after a refresh.
  */
 export function recordDismissal(
   key: string,
@@ -111,7 +128,10 @@ export function recordDismissal(
   now: number,
   storages: StoragePair,
 ): void {
-  if (frequency === "always") return;
+  if (frequency === "always") {
+    dismissedThisPageLoad.add(key);
+    return;
+  }
 
   const storage = frequency === "once_per_session" ? storages.session : storages.local;
   if (!storage) return;

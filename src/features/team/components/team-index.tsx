@@ -97,7 +97,7 @@ export function TeamIndex({ read }: { read: TeamListRead }) {
   }
 
   return (
-    <Section labelledBy="team-heading" ground="surface" index="01">
+    <Section labelledBy="team-heading" ground="surface">
       <h2 id="team-heading" className="sr-only">
         Our team
       </h2>

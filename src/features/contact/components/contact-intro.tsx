@@ -10,7 +10,7 @@ import { ContactMethods } from "./contact-methods";
  * The `/contact` page header, and the contact-method cards under it.
  *
  * ── Why this page does not open on the deep hero ground ─────────────────────
- * `/` and `/services` both open on the deep ledger ground, because both are
+ * `/services` opens on the deep ground, because it is
  * pages a visitor has to be persuaded by. `/contact` is a page a visitor has
  * already decided to use, and the fastest thing it can do is put the ways of
  * reaching us on screen without a full-height marketing panel first. That is a
@@ -23,7 +23,7 @@ import { ContactMethods } from "./contact-methods";
  */
 export function ContactIntro({ offices }: { offices: readonly Office[] }) {
   return (
-    <Section labelledBy="contact-heading" index="01">
+    <Section labelledBy="contact-heading">
       <SectionHeading
         as="h1"
         id="contact-heading"

@@ -15,7 +15,7 @@ export function ServiceOverview({ paragraphs }: { paragraphs: readonly string[] 
   if (paragraphs.length === 0) return null;
 
   return (
-    <Section labelledBy="overview-heading" index="01">
+    <Section labelledBy="overview-heading">
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-4">
           <SectionHeading

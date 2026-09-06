@@ -680,7 +680,7 @@ async function expectEveryGridRowIsFull(page: Page, selector: string, label: str
   }
 }
 
-test.describe("landing page grids", () => {
+test.describe("content grids", () => {
   test("leaves no stranded card in the services grid", async ({ page }) => {
     await page.goto("/");
     await waitUntilMeasurable(page);
@@ -691,8 +691,12 @@ test.describe("landing page grids", () => {
     );
   });
 
+  /* `/services`, not `/`. The engagement steps were removed from the homepage
+     when each got a dedicated page; they are unchanged on `/services`,
+     `/about` and `/contact`, so the gate follows them rather than being
+     deleted along with the section that used to host it. */
   test("leaves no stranded step in the engagement grid", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/services");
     await waitUntilMeasurable(page);
     await expectEveryGridRowIsFull(page, '[aria-labelledby="how-heading"] ol', "steps");
   });
@@ -706,7 +710,7 @@ test.describe("landing page grids", () => {
    * two-line reservation from `xl` — both of which this notices if they regress.
    */
   test("starts every step body on the same baseline as its row", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/services");
     await waitUntilMeasurable(page);
 
     const rows = await page.evaluate(() => {

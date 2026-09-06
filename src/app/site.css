@@ -16,67 +16,105 @@
  */
 
 /* ------------------------------------------------------------------ *
- * 1. The hero ground — deep in BOTH schemes, on purpose.
+ * 1. The brand palette, taken from the logo.
  *
- * Every M3 role token flips between light and dark, which is right for
- * content surfaces and wrong for a hero: a "deep ground with a serif
- * display headline" that turns pale in dark mode is a different design,
- * not a themed one. These two values are therefore fixed, chosen from
- * the primary hue so the hero still belongs to the palette. Contrast of
- * --hero-ink on --hero-ground is ~14:1, comfortably past WCAG AAA.
+ * `globals.css` is the shared design system and is copied byte-for-byte
+ * into `admin`; a `diff` against `shared/globals.css` must stay empty and
+ * CI checks it. So the firm's own colours are applied here, where they
+ * reach the public site and nothing else. Re-point the shared file only
+ * when the console is meant to change with it.
+ *
+ * The three values are sampled from `public/brand/logo.png`, not guessed:
+ * the wordmark and book outline are #004C8E, the bar chart is #78B818.
+ *
+ * **The logo's green is not usable as a text colour.** #78B818 on white
+ * measures 2.42:1 — it fails WCAG at any size, and the painted-ground
+ * contrast gate in `e2e/responsive.spec.ts` fails with it. So the token
+ * below is that hue darkened until it is legible (5.09:1); the true green
+ * appears only where it belongs, inside the logo artwork itself.
  * ------------------------------------------------------------------ */
 :root {
-  --hero-ground: #08262b;
-  --hero-ground-2: #0e3a41;
-  --hero-ink: #eef5f5;
-  --hero-ink-muted: rgba(238, 245, 245, 0.72);
-  /* 0.62, not the 0.5 this shipped at. At 0.5 the eyebrow and the 01–06
-     numerals in the hero's practice-index panel measured 3.83–4.42:1 against
-     the ground actually painted behind them (the base colour plus the radial
-     bloom plus the panel's own 3% white), i.e. under the 4.5:1 floor for text
-     that size. Lighthouse caught it; our axe gate did not, because axe skips
-     `aria-hidden` nodes for contrast and most of those numerals are aria-hidden
-     — see the painted-ground contrast gate in `e2e/responsive.spec.ts`, added
-     for exactly this class of miss. 0.62 measures 4.99:1 at the worst-lit point
-     and still sits well below `--hero-ink` (1.0), so the numerals stay
-     secondary to the service names they index. */
-  --hero-ink-subtle: rgba(238, 245, 245, 0.62);
-  --hero-rule: rgba(238, 245, 245, 0.12);
-  /* The accent word in the headline. Warm brass against the teal ground —
-     the tertiary role, lightened enough to hold at display sizes. */
-  --hero-accent: #ffc78e;
+  --brand-blue: #004c8e;
+  /* One step brighter, for interactive blue: the filled CTA and the accent
+     line of the headline, where #004C8E reads closer to black than to blue. */
+  --brand-blue-bright: #0060ae;
+  --brand-navy: #062340;
+  --brand-green-ink: #4f7a11;
+
+  /* ---- Roles the brand overrides -------------------------------------- *
+   * Only the hues change. Every neutral, status and container role is left
+   * to `globals.css`, so a primitive built against the design system keeps
+   * behaving exactly as specified. */
+  --md-primary: var(--brand-blue);
+  --md-primary-container: #cfe3f6;
+  --md-on-primary-container: #00243f;
+  --md-secondary: #3c5a75;
+  --md-secondary-container: #d8e6f3;
+  --md-on-secondary-container: #0b1d2c;
+  /* Tertiary is the emphasis accent, and for this firm it is the green. */
+  --md-tertiary: var(--brand-green-ink);
+  --md-tertiary-container: #dcefc4;
+  --md-on-tertiary-container: #1d2f06;
+
+  /* Cool near-white rather than the shared warm paper: the firm's ground is
+     the white of the office photography, and a warm paper beside it reads as
+     two different whites. */
+  --md-surface: #ffffff;
+  --md-on-surface: #16202c;
+  /* #374557, not the #445468 this was first set to.
+     The section index numerals render at `opacity-80` over this role, and
+     `section.tsx` documents that as an invariant: "opacity-80 over
+     text-on-surface-variant clears the floor on every ground the site uses".
+     #445468 composited at 80% over the highest container measured 4.11:1 —
+     under the floor — and axe failed the landing and services pages on the
+     first run after the palette changed. #374557 holds 4.89:1 at 80% on the
+     worst ground and 8.27:1 at full strength, so the invariant is true again
+     rather than true-on-the-grounds-someone-happened-to-check. */
+  --md-on-surface-variant: #374557;
+  --md-surface-container-low: #f6f9fc;
+  --md-surface-container: #eef3f8;
+  --md-surface-container-high: #e6edf4;
+  --md-surface-container-highest: #dee7f0;
+  --md-outline: #6b7c8f;
+  --md-outline-variant: #ccd8e4;
 }
 
 /* ------------------------------------------------------------------ *
- * 2. The ledger-rule motif.
+ * 1b. Two hero grounds, and they are not the same thing.
  *
- * The hero is typographic, not photographic (§D.6). What stops "type on a
- * dark rectangle" from reading as unfinished is a restrained texture, and
- * the honest one for an accountancy practice is ruled ledger paper: evenly
- * spaced hairlines, fading out before they compete with the headline.
- * A repeating-linear-gradient costs no bytes and no requests.
+ * **--hero-* is the DEEP ground.** The service-page heroes, the closing
+ * CTA band and `<Section ground="deep">` all paint it. It is fixed rather
+ * than themed for the reason it always was: a deep ground that turns pale
+ * is a different design, not a themed one. The hues are now the firm's —
+ * navy from the logo, with the logo's green as the accent — instead of
+ * the design system's teal and brass. Measured on --hero-ground: ink
+ * 13.9:1, muted 8.8:1, subtle 7.2:1, accent 9.7:1.
+ *
+ * **--hero-photo-* is the LANDING hero**, which is a photograph of the
+ * firm's office rather than a painted ground, so its ink is dark. The two
+ * families are named apart on purpose: they were briefly one, and a single
+ * `--hero-ink` meant light type on the CTA band and dark type on the
+ * landing page had to be the same value, which is impossible.
  * ------------------------------------------------------------------ */
-.ledger-rules {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    var(--hero-rule) 0,
-    var(--hero-rule) 1px,
-    transparent 1px,
-    transparent 3rem
-  );
-  /* Fade top and bottom so the rules never terminate on a hard edge. */
-  mask-image: linear-gradient(to bottom, transparent, black 18%, black 72%, transparent);
-}
+:root {
+  --hero-ground: #062340;
+  --hero-ground-2: #0d3a63;
+  --hero-ink: #eaf1f8;
+  --hero-ink-muted: rgba(234, 241, 248, 0.74);
+  /* 0.64, not 0.5. At 0.5 the eyebrows and index numerals on the deep
+     grounds measured under the 4.5:1 floor against the ground actually
+     painted behind them — base colour plus radial bloom plus a panel's own
+     white. Lighthouse caught it; axe did not, because axe skips
+     `aria-hidden` nodes for contrast and most of those numerals are
+     aria-hidden. Hence the painted-ground gate in `e2e/responsive.spec.ts`. */
+  --hero-ink-subtle: rgba(234, 241, 248, 0.64);
+  --hero-rule: rgba(234, 241, 248, 0.14);
+  --hero-accent: #a9d96a;
 
-/* A single vertical rule, used to mark the left edge of the hero copy. */
-.ledger-spine {
-  background-image: linear-gradient(
-    to bottom,
-    transparent,
-    var(--hero-rule) 12%,
-    var(--hero-rule) 88%,
-    transparent
-  );
+  /* The landing hero: dark ink on the bright left third of the photograph. */
+  --hero-photo-ink: var(--brand-navy);
+  --hero-photo-ink-muted: #3d4f63;
+  --hero-photo-accent: var(--brand-blue-bright);
 }
 
 /* ------------------------------------------------------------------ *
@@ -377,4 +415,47 @@
  * to remember to undo it on unmount. */
 html:has(dialog[open].site-popup) {
   overflow: hidden;
+}
+
+/* ------------------------------------------------------------------ *
+ * Link hover — one motif, used by the masthead nav and the footer.
+ *
+ * A colour change alone is a weak affordance: it is easy to miss on a
+ * quick scan, and it is the only signal for someone who cannot separate
+ * the two colours. `.link-underline` adds a rule that grows from the
+ * reading-start edge, so the cue is *motion and shape* as well as hue.
+ *
+ * `scaleX` on a pseudo-element rather than `text-decoration`, because a
+ * transform is composited — it cannot reflow the line, and it animates on
+ * the GPU. `transform-origin` is logical (`inline-start`), so the rule
+ * would still grow from the correct edge in a right-to-left script.
+ *
+ * The current page's link keeps the rule permanently: `aria-current` is
+ * already on it for assistive tech, and this is the visible half of the
+ * same statement.
+ * ------------------------------------------------------------------ */
+.link-underline {
+  position: relative;
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.25rem;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: inline-start;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.link-underline:hover::after,
+.link-underline:focus-visible::after,
+.link-underline[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .link-underline::after {
+    transition: none;
+  }
 }

@@ -59,12 +59,18 @@ beforeEach(() => {
 });
 
 describe("recordDismissal", () => {
-  it("does not persist anything for `always` — the message is meant to return", () => {
-    recordDismissal("a", "always", NOW, storages());
+  it("persists nothing for `always`, but holds it for this page load", () => {
+    recordDismissal("always-scoped", "always", NOW, storages());
 
+    // Nothing written: a reload must bring it back, and a stored value would
+    // survive one.
     expect(window.localStorage.getItem(DISMISSAL_STORAGE_KEY)).toBeNull();
     expect(window.sessionStorage.getItem(DISMISSAL_STORAGE_KEY)).toBeNull();
-    expect(isDismissed("a", NOW, storages())).toBe(false);
+
+    // …but it stays closed while the visitor moves around the site, which is
+    // what a client-side navigation is. Only a real page load clears it, and a
+    // page load is what re-evaluates the module holding it.
+    expect(isDismissed("always-scoped", NOW, storages())).toBe(true);
   });
 
   it("puts `once_per_session` in sessionStorage, so a new tab sees it again", () => {
@@ -162,8 +168,14 @@ describe("PREPAINT_DISMISSAL_SCRIPT agrees with isDismissed", () => {
       .map((element) => element.getAttribute("data-site-message") ?? "");
   }
 
+  /**
+   * `always` is absent on purpose. It is held in memory rather than in storage,
+   * so the pre-paint script cannot see it and must not — the whole point is
+   * that a reload brings the message back, and the script runs on exactly that
+   * reload. Parity here is about *persisted* dismissals, which is all the
+   * script was ever able to read.
+   */
   const cases: { frequency: MessageFrequency; expectHidden: boolean }[] = [
-    { frequency: "always", expectHidden: false },
     { frequency: "once_per_session", expectHidden: true },
     { frequency: "once_per_day", expectHidden: true },
     { frequency: "once_ever", expectHidden: true },

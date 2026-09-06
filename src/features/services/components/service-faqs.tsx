@@ -43,7 +43,7 @@ export function ServiceFaqs({
   if (faqs.length === 0) return null;
 
   return (
-    <Section labelledBy="service-faq-heading" index="05">
+    <Section labelledBy="service-faq-heading">
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-4">
           <SectionHeading

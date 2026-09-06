@@ -1,4 +1,14 @@
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Calculator,
+  Check,
+  ClipboardCheck,
+  FileText,
+  Receipt,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/section";
@@ -17,128 +27,53 @@ import { vocabulary } from "@/lib/vocabulary";
  * the difference between a services page and a services page a prospect
  * believes.
  *
- * The card is drawn rather than filled: a hairline border, a mono index above the
- * name, and a ruled separator above the deliverables. No shadow — a page of
- * floating cards reads as a SaaS template, and ruled paper is this practice's own
- * material.
+ * ── Six equal cards, and the featured tile is gone ──────────────────────────
+ * This used to give the defining service a cell two columns wide and two rows
+ * tall, with `serviceGridSpans` computing the arrangement so that no row was
+ * ever left with a lone card beside dead space. It worked, and it was still
+ * wrong: one service's copy does not fill a 700px cell, so the tile needed a
+ * photograph and a larger button to justify its height, and the section grew
+ * to nearly a full screen for six short summaries. Emphasis that costs that
+ * much height is not emphasis, it is imbalance.
  *
- * **This is the one section on the page that keeps cards** (CLAUDE.md §3.8b).
- * Six discrete, separately-linked offerings are what a card is actually for; the
- * firm's commitments and the engagement steps, which used to be card grids
- * either side of this one, are now ruled entries and a numbered sequence, so the
- * page no longer repeats one composition three times.
+ * Six items in three columns is exactly two full rows — no stranding to solve,
+ * no span arithmetic, and a section a reader takes in at a glance. The firm's
+ * `featured` flag survives as a **quiet** accent: a tinted ground and a ring,
+ * at the same size as its neighbours. Emphasis without a hole beside it.
  *
- * The tinted icon chip on every card went with them. An icon per heading is the
- * template signal §3.8b names, and a clipboard glyph beside "Audit & assurance"
- * restates the word without adding to it — whereas the mono index does encode
- * something true, because the list is ordered by the sequence in which a Nepali
- * business meets these obligations.
+ * **The tinted icon tile is here at the firm's direction.** It had been removed
+ * as the template signal §3.8b names — a clipboard glyph beside "Audit &
+ * assurance" restates the word rather than adding to it. The firm's judgement
+ * is that the page read as too editorial without it, and that is their call.
+ * The mono index stays alongside, because it encodes something the icon does
+ * not: the list is ordered by the sequence in which a Nepali business meets
+ * these obligations.
  *
  * Grid: 1 → 2 at `sm` → 3 at `lg` (§D.3 rule 6). `auto-rows-fr` plus `h-full`
- * keeps a row's cards equal-height with no JS measure. The spans that make the
- * last row come out even are computed by `serviceGridSpans` — see the reasoning
- * on that function.
+ * keeps a row's cards equal-height with no JS measure.
  */
-
-export type ServiceCellSpan = {
-  /** Columns the cell occupies in the 3-column (`lg`) layout. */
-  readonly lgCols: 1 | 2 | 3;
-  /** Rows the cell occupies in the 3-column (`lg`) layout. */
-  readonly lgRows: 1 | 2;
-  /** Columns the cell occupies in the 2-column (`sm`) layout. */
-  readonly smCols: 1 | 2;
-};
 
 /**
- * How every cell in the grid is sized, so that **no row is ever left with a lone
- * card and dead space beside it**.
- *
- * The version this replaced gave the featured service `col-span-2` in a
- * three-column grid. Six services then occupy seven cells, seven is not a
- * multiple of three, and the last row rendered one 403px card with 826px of
- * empty grid beside it (measured at 1440 and at 1920). A featured treatment that
- * strands a card is worse than no featured treatment at all.
- *
- * Three columns, one **2×2** featured tile and five standard cells is 4 + 5 = 9,
- * which fills a 3×3 grid exactly. That only holds when `count % 3 === 0`, so the
- * emphasis is applied *conditionally on the data* rather than assumed — the
- * service list is editable (it becomes a CMS collection in Phase 4) and a
- * seventh service must not silently reintroduce the hole.
- *
- * When the count cannot take the featured tile, the tail is widened instead: a
- * remainder of one makes the last card full-width, a remainder of two widens the
- * last card to two columns. Both fill the row. The same rule runs for the
- * two-column (`sm`) layout, where an odd count would otherwise strand the last
- * card.
- *
- * Exported and unit-tested because it is the whole fix: a component is awkward
- * to assert about, an array of spans is not.
+ * `ServiceItem.icon` is a lucide name held as a plain string, so `content.ts`
+ * stays free of component imports and can be read anywhere. This is the one
+ * place that resolves it. An unrecognised name falls back rather than throwing:
+ * a card with the wrong glyph is a blemish, a card that crashes the page is an
+ * outage.
  */
-export function serviceGridSpans(
-  count: number,
-  featuredIndex: number,
-): readonly ServiceCellSpan[] {
-  if (count <= 0) return [];
-
-  const spans: ServiceCellSpan[] = Array.from({ length: count }, () => ({
-    lgCols: 1,
-    lgRows: 1,
-    smCols: 1,
-  }));
-
-  /* ── Three columns ────────────────────────────────────────────────────────
-   * The 2×2 tile fills exactly when the cells sum to whole rows *and* grid
-   * auto-placement can actually reach that arrangement. The second condition is
-   * the one that is easy to miss: `grid-auto-flow: row` is sparse, so a
-   * two-column item that does not fit the space left in the current row skips to
-   * the next one and **leaves the remainder of that row empty** — the very hole
-   * this function exists to prevent. Requiring the tile to start a row
-   * (`featuredIndex % 3 === 0`) is what guarantees it always fits where it is
-   * placed. */
-  const canFeature =
-    featuredIndex >= 0 &&
-    featuredIndex < count &&
-    featuredIndex % 3 === 0 &&
-    count % 3 === 0 &&
-    count >= 6;
-
-  if (canFeature) {
-    spans[featuredIndex] = { ...spans[featuredIndex]!, lgCols: 2, lgRows: 2 };
-  } else {
-    // No featured tile: widen the tail instead, so the last row is still whole.
-    const remainder = count % 3;
-    if (remainder === 1) {
-      spans[count - 1] = { ...spans[count - 1]!, lgCols: 3 };
-    } else if (remainder === 2) {
-      spans[count - 1] = { ...spans[count - 1]!, lgCols: 2 };
-    }
-  }
-
-  // ── Two columns ──────────────────────────────────────────────────────────
-  if (count % 2 === 1) {
-    spans[count - 1] = { ...spans[count - 1]!, smCols: 2 };
-  }
-
-  return spans;
-}
-
-/* Static class strings, because Tailwind reads the source and cannot resolve a
- * template literal. Keyed by the span so the lookup stays total. */
-const LG_COLS = { 1: "", 2: "lg:col-span-2", 3: "lg:col-span-3" } as const;
-const LG_ROWS = { 1: "", 2: "lg:row-span-2" } as const;
-const SM_COLS = { 1: "", 2: "sm:col-span-2" } as const;
+const SERVICE_ICONS: Record<string, LucideIcon> = {
+  ClipboardCheck,
+  Receipt,
+  Calculator,
+  FileText,
+  BookOpen,
+  TrendingUp,
+};
 
 export function ServiceGrid({ items = services }: { items?: readonly ServiceItem[] }) {
   if (items.length === 0) return null;
 
-  const featuredIndex = items.findIndex((item) => item.featured);
-  const spans = serviceGridSpans(items.length, featuredIndex);
-  /* A service is only *rendered* as featured when it actually got the big cell.
-   * Otherwise the flag would produce display type in a standard-sized card. */
-  const featuredCell = featuredIndex >= 0 && spans[featuredIndex]?.lgRows === 2;
-
   return (
-    <Section labelledBy="services-heading" ground="muted" index="02">
+    <Section labelledBy="services-heading" ground="muted">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <SectionHeading
           id="services-heading"
@@ -158,27 +93,12 @@ export function ServiceGrid({ items = services }: { items?: readonly ServiceItem
         </Link>
       </div>
 
-      <ul className="mt-12 grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-        {items.map((service, index) => {
-          const span = spans[index]!;
-          return (
-            <li
-              key={service.slug}
-              className={cn(
-                "rise",
-                SM_COLS[span.smCols],
-                LG_COLS[span.lgCols],
-                LG_ROWS[span.lgRows],
-              )}
-            >
-              <ServiceCard
-                service={service}
-                index={index}
-                big={featuredCell && index === featuredIndex}
-              />
-            </li>
-          );
-        })}
+      <ul className="mt-10 grid auto-rows-fr gap-4 sm:grid-cols-2 lg:mt-12 lg:grid-cols-3 lg:gap-5">
+        {items.map((service, index) => (
+          <li key={service.slug} className="rise">
+            <ServiceCard service={service} index={index} />
+          </li>
+        ))}
       </ul>
 
       <Link
@@ -195,69 +115,61 @@ export function ServiceGrid({ items = services }: { items?: readonly ServiceItem
   );
 }
 
-/**
- * One card. `big` is true only for the 2×2 featured cell, and only from `lg` —
- * below that every card is the same width and the emphasis simply does not
- * apply, so every `big` class carries an `lg:` prefix.
- *
- * ── Why the featured tile's deliverables become a ruled index ────────────────
- * A cell two rows tall is roughly 700px at 1920, and one service's copy is
- * nowhere near 700px. The first version of this stacked the same short blocks at
- * the top and pinned the deliverables to the bottom, which traded the grid's
- * orphaned card for a 300px hole inside the card — no better.
- *
- * So the deliverables stop being a bullet list and become the thing that fills
- * the tile: four rows, each on a hairline, each stretching to share the height
- * that is actually available. Evenly-spaced rules are what turn empty space into
- * structure rather than into a gap, and a ruled index is the same motif the hero
- * and the section numbering already use. The tile gets taller or shorter with
- * the viewport and the rows absorb the difference.
- */
-function ServiceCard({
-  service,
-  index,
-  big,
-}: {
-  service: ServiceItem;
-  index: number;
-  big: boolean;
-}) {
-  /* The featured tile has the height for every deliverable; a standard card
-   * shows three, because a fourth would push the card past its neighbours. */
-  const includes = service.includes.slice(0, big ? 4 : 3);
+function ServiceCard({ service, index }: { service: ServiceItem; index: number }) {
+  const Icon = SERVICE_ICONS[service.icon] ?? ClipboardCheck;
+  /* Three, not four. A fourth line on one card and not its neighbours is what
+   * puts a row's "Read more" links out of alignment; the detail page carries
+   * the full list. */
+  const includes = service.includes.slice(0, 3);
 
   return (
     <article
       className={cn(
-        "group @container relative flex h-full flex-col overflow-hidden rounded-xl border border-outline-variant bg-card p-6 transition-colors duration-300 hover:border-primary/45",
-        big && "lg:p-8",
+        "group relative flex h-full flex-col rounded-xl border border-outline-variant bg-card p-6 transition-colors duration-300 hover:border-primary/45",
+        /* The firm's emphasis, expressed at the same size as everything else:
+         * a tint and a ring, not a bigger cell. */
+        service.featured && "bg-primary/[0.04] ring-1 ring-primary/15",
       )}
     >
-      {/* Ledger index, in the flow rather than floating in a corner: with the
-          icon chip gone it is the card's first line, and it matches the
-          numbering the hero's practice index and the engagement steps use.
-          `aria-hidden` because the card's accessible name is the service name;
-          the numeral is a position. Opacity 0.8, not the 0.4 it started at —
-          `aria-hidden` does not exempt visible text from the 4.5:1 floor, and
-          the axe gate measured 2.0:1 and failed. */}
-      <p
-        aria-hidden
-        className="tabular font-[family-name:var(--font-mono)] text-label-small text-on-surface-variant opacity-80"
-      >
-        {String(index + 1).padStart(2, "0")}
-      </p>
+      {/* Icon tile and index on one line: the glyph gives the card a visual
+          anchor, the numeral gives it a position in the sequence. Both are
+          `aria-hidden` — the card's accessible name is the service name, and a
+          screen reader gains nothing from "clipboard check, 01".
+
+          The tint alternates blue/green down the list so six cards do not read
+          as six of the same thing. Opacity 0.8 on the numeral, not the 0.4 it
+          started at: `aria-hidden` does not exempt visible text from the 4.5:1
+          floor, and the axe gate measured 2.0:1 and failed. */}
+      <div className="flex items-center justify-between gap-4">
+        <span
+          aria-hidden
+          className={cn(
+            "grid size-11 shrink-0 place-items-center rounded-xl",
+            index % 2 === 0
+              ? "bg-primary/10 text-primary"
+              : "bg-tertiary/10 text-tertiary",
+          )}
+        >
+          <Icon className="size-5" />
+        </span>
+        <p
+          aria-hidden
+          className="tabular font-[family-name:var(--font-mono)] text-label-small text-on-surface-variant opacity-80"
+        >
+          {String(index + 1).padStart(2, "0")}
+        </p>
+      </div>
 
       <h3
         className={cn(
-          "mt-4 font-[family-name:var(--font-display)] text-title-large text-on-surface",
+          "mt-5 font-[family-name:var(--font-display)] text-title-large text-on-surface",
           /* Two lines are reserved from `lg`, where the three-column measure is
            * narrow enough that one title wraps and another does not — which put
            * the summaries in a row 29px out of line with each other. From `xl`
            * the column is wide enough that every title fits on one line, so the
            * reservation is dropped rather than left as permanent dead space.
            * `lh` keeps the number tied to the type scale, not to a magic px. */
-          !big && "lg:min-h-[2lh] xl:min-h-0",
-          big && "lg:mt-5 lg:text-display-small",
+          "lg:min-h-[2lh] xl:min-h-0",
         )}
       >
         {/* Whole-card target: the pseudo-element covers the card, while the
@@ -270,62 +182,41 @@ function ServiceCard({
         </Link>
       </h3>
 
-      <p
-        className={cn(
-          "mt-2 text-body-medium text-on-surface-variant",
-          big && "lg:mt-4 lg:max-w-[52ch] lg:text-body-large",
-        )}
-      >
-        {service.summary}
-      </p>
+      <p className="mt-2 text-body-medium text-on-surface-variant">{service.summary}</p>
 
-      {big ? (
-        <p className="mt-8 hidden text-label-small text-on-surface-variant uppercase lg:block">
-          {vocabulary.labels.whatIsIncluded}
-        </p>
-      ) : null}
-
-      <ul
-        className={cn(
-          "mt-5 flex flex-col gap-2 border-t border-outline-variant pt-4 text-body-small text-on-surface-variant",
-          /* `flex-1` + `gap-0` + a per-row rule: the rows share whatever height
-             the tile has left, so the panel always reaches the bottom edge. */
-          big && "lg:mt-3 lg:flex-1 lg:gap-0 lg:border-t-0 lg:pt-0 lg:text-body-medium",
-        )}
-      >
+      <ul className="mt-5 flex flex-col gap-2 border-t border-outline-variant pt-4 text-body-small text-on-surface-variant">
         {includes.map((item) => (
-          <li
-            key={item}
-            className={cn(
-              "flex gap-2.5",
-              big &&
-                "lg:min-h-14 lg:flex-1 lg:items-center lg:gap-4 lg:border-t lg:border-outline-variant",
-            )}
-          >
+          <li key={item} className="flex gap-2.5">
+            {/* A filled tick, not a dot. These are things the firm actually
+                delivers, and a tick says "included" where a bullet only says
+                "item". White on the tertiary green measures 5.09:1. */}
             <span
               aria-hidden
-              className={cn(
-                "mt-[0.55rem] size-1 shrink-0 rounded-full bg-tertiary",
-                big && "lg:mt-0",
-              )}
-            />
-            {item}
+              className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-tertiary text-white"
+            >
+              <Check className="size-2.5" strokeWidth={3} />
+            </span>
+            <span className="min-w-0">{item}</span>
           </li>
         ))}
       </ul>
 
-      {/* Pushes the affordance to the bottom edge regardless of how much the copy
-          above wraps, so a row of cards aligns. The featured tile does not need
-          it — its deliverables panel already grows into the space. */}
-      {big ? null : <span className="mt-auto" />}
+      {/* Pushes the affordance to the bottom edge regardless of how much the
+          copy above wraps, so a row of cards aligns. */}
+      <span className="mt-auto" />
 
-      {/* One hover affordance, not three. The border tint and this arrow both
-          say "this is a link"; the rule that used to wipe along the bottom edge
-          said it a third time, which is decoration (§3.8b). */}
-      <ArrowUpRight
-        aria-hidden
-        className="pointer-events-none absolute right-5 bottom-5 size-4 text-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-      />
+      {/* An explicit affordance, not a glyph that only appears on hover. A
+          hover-only arrow is invisible on a touch device — which is most of
+          this site's traffic — and it made the card's one action something a
+          reader had to discover. The whole card is still the target; this is
+          what tells them so. */}
+      <span className="mt-6 inline-flex w-fit items-center gap-2 text-label-large text-primary">
+        {vocabulary.actions.readMore}
+        <ArrowRight
+          aria-hidden
+          className="size-4 transition-transform duration-300 motion-safe:group-hover:translate-x-1"
+        />
+      </span>
     </article>
   );
 }

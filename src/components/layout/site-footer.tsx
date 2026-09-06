@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Wordmark } from "@/components/brand/wordmark";
+import { BrandLogo } from "@/components/media/brand-logo";
 import {
   Accordion,
   AccordionItem,
@@ -66,7 +66,7 @@ export function SiteFooter() {
         <div className="grid gap-8 md:grid-cols-12">
           {/* Brand block. Stays a block at every width — it is the anchor. */}
           <div className="md:col-span-4">
-            <Wordmark className="h-9 w-auto text-primary" />
+            <BrandLogo priority={false} className="h-12" />
             <p className="mt-4 max-w-xs text-body-medium text-on-surface-variant">
               {brand.tagline}
             </p>
@@ -79,12 +79,18 @@ export function SiteFooter() {
             {tel || mail ? (
               <address className="mt-6 flex flex-col gap-1 text-body-medium not-italic">
                 {tel ? (
-                  <a href={tel} className="text-on-surface hover:text-primary">
+                  <a
+                    href={tel}
+                    className="link-underline text-on-surface transition-colors hover:text-primary"
+                  >
                     {brand.contact.phone}
                   </a>
                 ) : null}
                 {mail ? (
-                  <a href={mail} className="break-all text-on-surface hover:text-primary">
+                  <a
+                    href={mail}
+                    className="link-underline break-all text-on-surface transition-colors hover:text-primary"
+                  >
                     {brand.contact.email}
                   </a>
                 ) : null}
@@ -104,7 +110,7 @@ export function SiteFooter() {
                         href={social.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex min-h-11 items-center text-body-medium text-on-surface-variant hover:text-primary"
+                        className="link-underline inline-flex min-h-11 items-center text-body-medium text-on-surface-variant transition-colors hover:text-primary"
                       >
                         {social.label}
                       </a>
@@ -209,7 +215,7 @@ function RegistrationLine() {
 function FooterLink({ href, label }: { href: string; label: string }) {
   const external = /^https?:\/\//.test(href);
   const className =
-    "inline-flex min-h-11 items-center text-body-medium text-on-surface-variant hover:text-primary md:min-h-0";
+    "link-underline inline-flex min-h-11 items-center text-body-medium text-on-surface-variant transition-colors hover:text-primary md:min-h-0";
 
   return external ? (
     <a href={href} target="_blank" rel="noopener noreferrer" className={className}>

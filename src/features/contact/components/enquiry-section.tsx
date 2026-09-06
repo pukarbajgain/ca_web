@@ -51,7 +51,7 @@ export function EnquirySection({
   showNoDirectChannelsNote: boolean;
 }) {
   return (
-    <Section labelledBy="enquiry-heading" ground="muted" index="02">
+    <Section labelledBy="enquiry-heading" ground="muted">
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-4">
           <SectionHeading

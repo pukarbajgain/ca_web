@@ -15,7 +15,7 @@ import type { Service } from "../types";
 /**
  * The `/services/[slug]` opening.
  *
- * The same deep ground and ledger rule as the index and the closing CTA band, so
+ * The same deep ground as the index and the closing CTA band, so
  * the page opens and closes on one note. What it carries is deliberately short:
  * a breadcrumb (this is the site's only depth-3 page, and the trail is the
  * fastest route to a sibling service), the service name as the `h1`, its one
@@ -44,10 +44,6 @@ export function ServiceHero({
       /* Not pulled up under the header — see the note in `services-hero.tsx`. */
       className="relative isolate overflow-hidden bg-[var(--hero-ground)] text-[color:var(--hero-ink)]"
     >
-      <div
-        aria-hidden
-        className="ledger-rules pointer-events-none absolute inset-0 -z-10"
-      />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_80%_at_85%_50%,var(--hero-ground-2),transparent_70%)]"

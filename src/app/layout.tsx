@@ -75,9 +75,6 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
-  icons: {
-    icon: [{ url: "/brand/monogram.svg", type: "image/svg+xml" }],
-  },
   // `format-detection` off: iOS otherwise turns every number in an article —
   // section references, amounts, fiscal years — into a blue phone link.
   formatDetection: { telephone: false, address: false, email: false },
@@ -95,13 +92,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang={brand.locale.language}
+      /**
+       * `data-theme="light"` is stamped statically, and it is the whole of this
+       * site's dark-mode removal.
+       *
+       * `globals.css` is the shared design system and must stay byte-identical
+       * to `admin`'s copy, so its dark blocks cannot be deleted — but they are
+       * written to be escapable: the media query is guarded
+       * `:root:not([data-theme="light"])`, and the explicit dark palette keys on
+       * `[data-theme="dark"]`. Declaring light here makes the first selector
+       * fail and the second never match, so a visitor whose system is set to
+       * dark still gets the firm's light palette, with no override CSS and no
+       * flash. `color-scheme` tells the browser to match its own form controls
+       * and scrollbars to it.
+       */
+      data-theme="light"
+      style={{ colorScheme: "light" }}
       className={`${serif.variable} ${sans.variable} ${mono.variable}`}
-      /* next-themes writes `data-theme` and `color-scheme` onto this element
-       * from an inline script that runs before React hydrates — deliberately,
-       * so the page never flashes the wrong scheme. That is an attribute
-       * mismatch by construction, and this suppresses the warning for this one
-       * element only. It does not suppress anything for descendants. */
-      suppressHydrationWarning
     >
       <body className="min-h-dvh">
         {/* Bypass block (WCAG 2.4.1). First tab stop, visible only on focus. */}

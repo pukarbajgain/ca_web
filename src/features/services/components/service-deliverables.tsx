@@ -19,7 +19,7 @@ export function ServiceDeliverables({ items }: { items: readonly string[] }) {
   if (items.length === 0) return null;
 
   return (
-    <Section labelledBy="deliverables-heading" ground="muted" index="04">
+    <Section labelledBy="deliverables-heading" ground="muted">
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-4">
           <SectionHeading

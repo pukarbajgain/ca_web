@@ -14,20 +14,17 @@ import { UtilityBar } from "@/components/layout/utility-bar";
  * path. The reasoning is written out in full in
  * `@announcement/[[...path]]/page.tsx`; the two files that place them are here.
  *
- * **Both sit above the header, and that is a deliberate reversal.** The notice
- * band read better directly beneath the header — until the homepage, whose hero
- * pulls itself up under a transparent header (`hero.tsx`) so the page does not
- * open on a hard light-on-dark seam. A notice between the two breaks that in two
- * ways at once: the hero slides up over the notice and eats 4rem of it, and the
- * header's light ink ends up on the notice's light ground, unreadable.
+ * Their positions differ, which is the point of having two: an announcement
+ * outranks the utility bar and sits above it, while a notice is the first thing
+ * *inside* the page and sits at the top of `<main>`, above `children`, so no
+ * page added later can forget to render it.
  *
- * Every fix that kept the notice under the header required the header to know
- * whether a notice had rendered — and the header is a sibling of the slot, in a
- * layout that cannot inspect either. Coupling the message engine to one page's
- * hero treatment to buy 80px of position is a bad trade. Above the masthead is
- * also a pattern readers know from government and bank sites, and it has the
- * property that matters more: it is correct on every page, including the ones
- * added next year.
+ * The notice band sat above the masthead for a while, and the reason is worth
+ * keeping: the landing hero used to be a deep typographic ground that pulled
+ * itself up under a transparent header, and a notice between the two both got
+ * eaten by the hero and put the header's light ink on a light band. The hero is
+ * photographic and bright now and the header is always solid, so the constraint
+ * is gone and the band is back where it reads best.
  *
  * **`pb-action-bar` on `<main>` is load-bearing.** The action bar is `position:
  * fixed`, so without a matching bottom padding it permanently covers the last
@@ -53,11 +50,11 @@ export default function MarketingLayout({
   return (
     <div className="flex min-h-dvh flex-col">
       {announcement}
-      {notices}
       <UtilityBar />
       <SiteHeader />
 
       <main id="main" tabIndex={-1} className="pb-action-bar flex-1 outline-none">
+        {notices}
         {children}
       </main>
 

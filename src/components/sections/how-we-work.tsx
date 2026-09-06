@@ -37,7 +37,7 @@ import { vocabulary } from "@/lib/vocabulary";
  */
 export function HowWeWork() {
   return (
-    <Section labelledBy="how-heading" index="03">
+    <Section labelledBy="how-heading">
       <SectionHeading
         id="how-heading"
         eyebrow={vocabulary.sections.howWeWork}

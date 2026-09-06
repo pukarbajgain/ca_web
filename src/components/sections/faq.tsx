@@ -33,7 +33,7 @@ export function Faq({ items = faqs }: { items?: readonly FaqItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <Section id="faq" labelledBy="faq-heading" index="05">
+    <Section id="faq" labelledBy="faq-heading">
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-4">
           <SectionHeading

@@ -274,7 +274,44 @@ async function expectTextMeetsContrastAgainstPaintedGround(page: Page) {
     return id;
   });
 
-  expect(total, "found no text to measure — the selector is wrong").toBeGreaterThan(20);
+  /**
+   * The sampler must actually have found the page's text.
+   *
+   * A gate that measures nothing passes, and that is the one failure mode a
+   * gate must not have — so this asserts the tagging pass above really matched
+   * something before any contrast is computed.
+   *
+   * **It used to be `> 20`, and that number failed CI on its first run.** The
+   * threshold was calibrated against pages full of content; CI runs these gates
+   * with no backend, so `/insights`, `/team` and `/downloads` correctly render a
+   * single "we could not load this" sentence, and at 390 the whole page is 18
+   * text runs rather than 20. A legitimately sparse page tripped a guard aimed
+   * at a broken selector.
+   *
+   * So the guard is structural instead of numeric: text was found, and it was
+   * found *inside the page's landmarks*. That says what the original number was
+   * reaching for — the sampler can see the page — without depending on how much
+   * content the API happened to return. `header` is deliberately not required:
+   * below `lg` it holds a wordmark drawn as SVG and an icon button, and neither
+   * is text.
+   */
+  expect(
+    total,
+    "the tagging pass matched no text at all — the selector is wrong",
+  ).toBeGreaterThan(0);
+
+  const blindLandmarks = await page.evaluate(() =>
+    ["main", "footer"]
+      .filter((selector) => document.querySelector(selector) !== null)
+      .filter(
+        (selector) =>
+          document.querySelectorAll(`${selector} [data-contrast-id]`).length === 0,
+      ),
+  );
+  expect(
+    blindLandmarks,
+    "the sampler tagged no text inside these landmarks, so it is measuring a page it cannot see",
+  ).toEqual([]);
 
   /* 2. Blank every glyph. Backgrounds, borders and rules stay exactly as
    *    painted, so what is left in the photograph is the ground. */

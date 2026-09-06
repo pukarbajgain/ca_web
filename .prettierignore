@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+pnpm-lock.yaml
+
+# Generated art. Regenerate with `pnpm assets:generate`, never hand-format.
+public/placeholders/
+public/brand/
+
+# THE canonical design system, copied verbatim from ../shared/globals.css
+# (ARCHITECTURE.md §J.2). Prettier reformats its selector lists, which makes the
+# copy diverge from the source and breaks the CI drift check — and the fix is to
+# edit the shared file, not this one. Excluded so `pnpm format` cannot touch it.
+src/app/globals.css

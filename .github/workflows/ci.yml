@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Literal values so the same `env.ts` validation that runs in production runs
+  # here too. Deliberately NOT `SKIP_ENV_VALIDATION`: a schema change that breaks
+  # a URL format should fail CI, not a deploy.
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  API_URL: http://localhost:8000
+  REVALIDATE_SECRET: ci-placeholder-secret-000000000000000000
+
+jobs:
+  verify:
+    name: format · lint · typecheck · test · audit · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Assert globals.css has not diverged from the shared design system
+        # ARCHITECTURE.md §J.2 names globals.css as the one artefact `web` and
+        # `admin` must not diverge on. It is a copy, so nothing but a check stops
+        # it drifting — and drift here is invisible until the two apps look
+        # different. Skipped when the sibling checkout is not present (this repo
+        # is deployed independently).
+        run: |
+          if [ -f ../shared/globals.css ]; then
+            diff -u ../shared/globals.css src/app/globals.css
+          else
+            echo "::notice::../shared/globals.css not present in this checkout; skipping drift check"
+          fi
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Prettier
+        run: pnpm format:check
+
+      - name: ESLint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Dependency audit
+        # CLAUDE.md §4.1 standing rule. Fails the build on a high or critical
+        # advisory rather than reporting one nobody reads.
+        run: pnpm audit --audit-level=high
+
+      - name: Build
+        run: pnpm build
+
+      # The built app is what the responsive and a11y gates run against — a
+      # dev-mode bundle behaves differently enough (overlay, unminified CSS, no
+      # ISR) that a green dev run is not evidence about production.
+      - name: Cache the build for the gates job
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: |
+            .next
+            !.next/cache
+          retention-days: 1
+
+  gates:
+    name: responsive · accessibility (390 / 768 / 1280 / 1920)
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .next
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Responsive + axe gates
+        # playwright.config.ts starts `pnpm start` when CI is set.
+        run: pnpm e2e
+
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7

@@ -1,0 +1,380 @@
+/**
+ * Site-specific decoration for `web`.
+ *
+ * ── Why this is not in `globals.css` ────────────────────────────────────────
+ * `globals.css` is the *canonical, shared* design system: it is copied verbatim
+ * from `ca_platform/shared/globals.css` into both `web` and `admin`, and
+ * ARCHITECTURE.md §J.2 names it as the one artefact the two frontends must not
+ * diverge on. Adding a marketing-site marquee and a hero ground to it would
+ * either force that decoration into the CMS console or start the divergence the
+ * rule exists to prevent. So public-site-only decoration lives here and is
+ * imported alongside it in `layout.tsx`. A `diff` against `shared/` must stay
+ * empty, and CI checks that.
+ *
+ * Everything below is either (a) a token the design system deliberately does not
+ * define, or (b) an animation Tailwind cannot express as a utility.
+ */
+
+/* ------------------------------------------------------------------ *
+ * 1. The hero ground — deep in BOTH schemes, on purpose.
+ *
+ * Every M3 role token flips between light and dark, which is right for
+ * content surfaces and wrong for a hero: a "deep ground with a serif
+ * display headline" that turns pale in dark mode is a different design,
+ * not a themed one. These two values are therefore fixed, chosen from
+ * the primary hue so the hero still belongs to the palette. Contrast of
+ * --hero-ink on --hero-ground is ~14:1, comfortably past WCAG AAA.
+ * ------------------------------------------------------------------ */
+:root {
+  --hero-ground: #08262b;
+  --hero-ground-2: #0e3a41;
+  --hero-ink: #eef5f5;
+  --hero-ink-muted: rgba(238, 245, 245, 0.72);
+  /* 0.62, not the 0.5 this shipped at. At 0.5 the eyebrow and the 01–06
+     numerals in the hero's practice-index panel measured 3.83–4.42:1 against
+     the ground actually painted behind them (the base colour plus the radial
+     bloom plus the panel's own 3% white), i.e. under the 4.5:1 floor for text
+     that size. Lighthouse caught it; our axe gate did not, because axe skips
+     `aria-hidden` nodes for contrast and most of those numerals are aria-hidden
+     — see the painted-ground contrast gate in `e2e/responsive.spec.ts`, added
+     for exactly this class of miss. 0.62 measures 4.99:1 at the worst-lit point
+     and still sits well below `--hero-ink` (1.0), so the numerals stay
+     secondary to the service names they index. */
+  --hero-ink-subtle: rgba(238, 245, 245, 0.62);
+  --hero-rule: rgba(238, 245, 245, 0.12);
+  /* The accent word in the headline. Warm brass against the teal ground —
+     the tertiary role, lightened enough to hold at display sizes. */
+  --hero-accent: #ffc78e;
+}
+
+/* ------------------------------------------------------------------ *
+ * 2. The ledger-rule motif.
+ *
+ * The hero is typographic, not photographic (§D.6). What stops "type on a
+ * dark rectangle" from reading as unfinished is a restrained texture, and
+ * the honest one for an accountancy practice is ruled ledger paper: evenly
+ * spaced hairlines, fading out before they compete with the headline.
+ * A repeating-linear-gradient costs no bytes and no requests.
+ * ------------------------------------------------------------------ */
+.ledger-rules {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--hero-rule) 0,
+    var(--hero-rule) 1px,
+    transparent 1px,
+    transparent 3rem
+  );
+  /* Fade top and bottom so the rules never terminate on a hard edge. */
+  mask-image: linear-gradient(to bottom, transparent, black 18%, black 72%, transparent);
+}
+
+/* A single vertical rule, used to mark the left edge of the hero copy. */
+.ledger-spine {
+  background-image: linear-gradient(
+    to bottom,
+    transparent,
+    var(--hero-rule) 12%,
+    var(--hero-rule) 88%,
+    transparent
+  );
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. Credential marquee.
+ *
+ * The list is repeated N times in the DOM (`--marquee-copies`, set by the
+ * component so the markup and this file cannot drift) and the whole rail
+ * is translated by exactly ONE copy's width. That is the only version of
+ * this that loops seamlessly: translating by half a copy — which is what
+ * `translateX(-50%)` on each individual track did before — lands the
+ * pattern out of phase and the strip visibly jumps once per cycle.
+ * Every copy after the first is aria-hidden, so the credentials are
+ * announced once.
+ *
+ * The edge fade is a MASK IN LENGTH UNITS, not percentages. At 5% a 390px
+ * viewport got a 19px fade, which is not a fade — the strip simply ended
+ * mid-word at a hard edge and read as a clipping bug rather than as
+ * motion. A clamp keeps the fade a real one at every width.
+ * ------------------------------------------------------------------ */
+@keyframes credential-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* One copy exactly. `100% / copies` is one copy's share of the rail. */
+    transform: translateX(calc(-100% / var(--marquee-copies, 4)));
+  }
+}
+
+.marquee-rail {
+  --marquee-fade: clamp(3rem, 8vw, 6rem);
+  animation: credential-marquee 42s linear infinite;
+  will-change: transform;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--marquee-fade),
+    black calc(100% - var(--marquee-fade)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--marquee-fade),
+    black calc(100% - var(--marquee-fade)),
+    transparent 100%
+  );
+}
+
+@media (hover: hover) {
+  .marquee-viewport:hover .marquee-rail {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The global block only sets duration to 0.01ms, which would snap the
+     rail to its end state and leave a static, half-cut strip. Reduced
+     motion has to mean "no ticker at all", so the rail stops being a rail:
+     the duplicate copies are removed, the single remaining list wraps, and
+     the mask comes off — a centred, complete, readable row of credentials
+     with nothing running off either edge. */
+  .marquee-rail {
+    animation: none !important;
+    transform: none !important;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .marquee-rail > [aria-hidden="true"] {
+    display: none;
+  }
+
+  .marquee-track {
+    flex-shrink: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.25rem;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 4. Scroll-driven entrance, with zero JavaScript.
+ *
+ * `animation-timeline: view()` inside `@supports` means browsers without
+ * scroll-driven animations render the content plainly visible — the
+ * content is never hidden by default, so this can only ever be
+ * progressive enhancement. No IntersectionObserver, no client boundary,
+ * no library.
+ *
+ * ── It animates transform ONLY. That is deliberate. ─────────────────
+ * The obvious version fades opacity from 0. Under a *scroll-driven*
+ * timeline the element's opacity is a function of scroll position rather
+ * than of elapsed time, so a partially-scrolled element sits at a
+ * partial opacity indefinitely — and 15px body text at opacity 0.28 on
+ * the page ground measures 1.68:1, well under the 4.5:1 AA floor. The
+ * axe gate caught exactly that on `/` at 1280px.
+ *
+ * This is not a test artefact: anyone scrolling slowly, or stopping
+ * mid-section, genuinely sees under-contrast text. A transform-only rise
+ * reads almost identically and can never reduce contrast, so the fix is
+ * to drop the fade rather than to exempt the check.
+ * ------------------------------------------------------------------ */
+@keyframes rise-in {
+  from {
+    transform: translateY(18px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rise {
+      animation: rise-in 0.6s var(--ease-emphasized) both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 5. The fixed mobile action bar's height, as a token.
+ *
+ * Declared once so the bar and the <main> padding that clears it cannot
+ * drift apart — the failure mode being a fixed bar permanently covering
+ * the last paragraph of every page (§D.3 rule 6).
+ * ------------------------------------------------------------------ */
+:root {
+  --action-bar-h: 3.5rem;
+}
+
+.pb-action-bar {
+  padding-bottom: calc(var(--action-bar-h) + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 48rem) {
+  .pb-action-bar {
+    padding-bottom: 0;
+  }
+}
+
+/* The action bar is chrome, not content: it must never print. */
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+}
+
+/* ── Article prose ─────────────────────────────────────────────────────────
+ * Styling for editor-authored HTML, which arrives sanitised from the backend
+ * and therefore carries no classes of its own.
+ *
+ * Written against the design tokens rather than a typography plugin: the type
+ * scale, measure and rhythm already exist in `globals.css`, and a plugin would
+ * bring a second, competing scale that drifts from it. Every value below is a
+ * token, so a change to the scale moves the article body with it.
+ *
+ * The measure is deliberately narrow. An article is read, not scanned, and
+ * ~68 characters is where a line stops costing the reader their place.
+ */
+.prose {
+  max-width: var(--container-prose);
+  font-size: var(--text-body-large);
+  line-height: 1.75;
+  color: var(--md-on-surface);
+}
+.prose > * + * {
+  margin-top: 1.25em;
+}
+.prose h2 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: var(--text-headline-medium);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  /* More space above than below, so a heading belongs to what follows it
+     rather than floating between two sections. */
+  margin-top: 2.5em;
+  margin-bottom: -0.25em;
+  scroll-margin-top: 6rem;
+}
+.prose h3 {
+  font-size: var(--text-title-large);
+  font-weight: 600;
+  margin-top: 2em;
+  margin-bottom: -0.35em;
+  scroll-margin-top: 6rem;
+}
+.prose ul,
+.prose ol {
+  padding-inline-start: 1.35em;
+}
+.prose li + li {
+  margin-top: 0.4em;
+}
+.prose ul {
+  list-style: disc;
+}
+.prose ol {
+  list-style: decimal;
+}
+.prose li::marker {
+  color: var(--md-outline);
+}
+.prose a {
+  color: var(--md-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 0.06em;
+}
+.prose strong {
+  font-weight: 600;
+  color: var(--md-on-surface);
+}
+.prose blockquote {
+  border-inline-start: 2px solid var(--md-outline-variant);
+  padding-inline-start: 1.25em;
+  color: var(--md-on-surface-variant);
+  font-style: italic;
+}
+.prose code {
+  font-family: var(--font-mono-src), ui-monospace, monospace;
+  font-size: 0.875em;
+  background: var(--md-surface-container);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-sm);
+}
+/* Wide content scrolls in its own container; the page never scrolls sideways. */
+.prose table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: var(--text-body-medium);
+  font-variant-numeric: tabular-nums;
+}
+.prose th,
+.prose td {
+  border-bottom: 1px solid var(--md-outline-variant);
+  padding: 0.6em 0.9em;
+  text-align: start;
+}
+.prose img {
+  border-radius: var(--radius-md);
+}
+
+/* ── Site messages ─────────────────────────────────────────────────────────
+ *
+ * Dismissal is applied by setting the `hidden` attribute — by the pre-paint
+ * script before React exists, and by the close button afterwards. A Tailwind
+ * utility that sets `display` (`flex`, `grid`, `block`) beats the attribute's
+ * user-agent rule on specificity, so without this a dismissed message would
+ * stay on screen and the bug would look like broken JavaScript. `!important`
+ * is correct here rather than lazy: `hidden` is a statement about whether the
+ * element exists for the reader, and nothing in a class list should outrank it.
+ */
+[hidden] {
+  display: none !important;
+}
+
+/*
+ * The popup. A native <dialog> in the top layer, so this styles the box and the
+ * backdrop only — position, focus containment, Escape and inertness are the
+ * browser's, and are not reimplemented here.
+ */
+.site-popup {
+  margin: auto;
+  border: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 48px -12px rgb(0 0 0 / 0.28);
+  overflow: hidden;
+}
+.site-popup::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+.site-popup,
+.site-popup::backdrop {
+  animation: site-popup-in 180ms ease-out;
+}
+@keyframes site-popup-in {
+  from {
+    opacity: 0;
+  }
+}
+/* A modal that fades in is a nicety; a modal that fades in for someone who has
+ * asked the system to stop moving things is a symptom. */
+@media (prefers-reduced-motion: reduce) {
+  .site-popup,
+  .site-popup::backdrop {
+    animation: none;
+  }
+}
+/* The page behind a native modal is inert but still scrollable, which reads as
+ * a broken overlay on a phone. `:has()` keeps the lock in CSS, so no effect has
+ * to remember to undo it on unmount. */
+html:has(dialog[open].site-popup) {
+  overflow: hidden;
+}

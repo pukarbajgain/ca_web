@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# next
+.next/
+out/
+next-env.d.ts
+
+# production
+build/
+dist/
+
+# testing
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# env — `.env.example` IS committed; nothing else is
+.env
+.env.local
+.env.*.local
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+.eslintcache
+.vercel

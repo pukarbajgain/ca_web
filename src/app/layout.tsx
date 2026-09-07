@@ -107,6 +107,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
        * and scrollbars to it.
        */
       data-theme="light"
+      /**
+       * Declares the `scroll-behavior: smooth` that `globals.css` sets on
+       * `html`. Next cannot read a stylesheet, so without this attribute it
+       * assumes scrolling is instant and restores scroll position on a route
+       * change before the smooth scroll has finished — the new page lands
+       * mid-animation at the wrong offset. Told about it, Next suppresses the
+       * behaviour for the duration of the transition and restores it after.
+       *
+       * It lives here rather than in `globals.css` because that file is the
+       * shared design system and must stay byte-identical to `admin`'s copy
+       * (repo CLAUDE.md §1.10). `admin` carries the same attribute for the
+       * same reason.
+       */
+      data-scroll-behavior="smooth"
       style={{ colorScheme: "light" }}
       className={`${serif.variable} ${sans.variable} ${mono.variable}`}
     >

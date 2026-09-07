@@ -18,6 +18,10 @@ test-results/
 playwright-report/
 blob-report/
 .playwright/
+# Scratch snapshots and console logs written by Playwright MCP, which CLAUDE.md
+# §5.4 makes the standard browser-verification tool. Untracked they land in the
+# working tree and fail `pnpm format:check`.
+.playwright-mcp/
 
 # env — `.env.example` IS committed; nothing else is
 .env
